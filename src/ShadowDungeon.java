@@ -9,7 +9,6 @@ public class ShadowDungeon extends AbstractGame {
     private final Properties GAME_PROPS;
     private final Properties MESSAGE_PROPS;
 
-
     public ShadowDungeon(Properties gameProps, Properties messageProps) {
         super(Integer.parseInt(gameProps.getProperty("window.width")),
                 Integer.parseInt(gameProps.getProperty("window.height")),
@@ -26,11 +25,17 @@ public class ShadowDungeon extends AbstractGame {
      */
     @Override
     protected void update(Input input) {
+
+        Image background = new Image("res/background.png");
+        background.draw(512, 384);
+
+        PrepRoom room = new PrepRoom(GAME_PROPS, MESSAGE_PROPS);
+        room.setBackground();
+
         if (input.wasPressed(Keys.ESCAPE)) {
             Window.close();
         }
     }
-
 
     /**
      * The main entry point of the Shadow Dungeon game.
