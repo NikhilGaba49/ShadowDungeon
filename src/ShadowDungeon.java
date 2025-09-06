@@ -6,8 +6,10 @@ import java.util.Optional;
 import java.util.Properties;
 
 public class ShadowDungeon extends AbstractGame {
+
     private final Properties GAME_PROPS;
     private final Properties MESSAGE_PROPS;
+    private final Player player;
 
     public ShadowDungeon(Properties gameProps, Properties messageProps) {
         super(Integer.parseInt(gameProps.getProperty("window.width")),
@@ -16,8 +18,9 @@ public class ShadowDungeon extends AbstractGame {
 
         this.GAME_PROPS = gameProps;
         this.MESSAGE_PROPS = messageProps;
-    }
 
+        player = new Player(gameProps, messageProps);
+    }
 
     /**
      * Render the relevant screen based on the keyboard input given by the user and the status of the gameplay.
@@ -25,6 +28,9 @@ public class ShadowDungeon extends AbstractGame {
      */
     @Override
     protected void update(Input input) {
+
+        Image playerImage = player.getPlayerImage();
+        playerImage.draw(player.getCoordinates().x, player.getCoordinates().y);
 
         Image background = new Image("res/background.png");
         background.draw(512, 384);

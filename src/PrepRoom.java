@@ -1,4 +1,5 @@
 import bagel.*;
+import bagel.util.*;
 
 import java.util.Properties;
 
@@ -14,39 +15,55 @@ public class PrepRoom {
         this.MESSAGE_PROPS = MESSAGE_PROPS;
     }
 
-    public boolean getIsPrepRoom() {
-        return isPrepRoom;
-    }
-
-    public void setPrepRoom(boolean prepRoom) {
-        isPrepRoom = prepRoom;
+    private Point getCoordinates(String property) {
+        String[] coordinatesString = GAME_PROPS.getProperty(property).split(",");
+        Point coordinatesInt = new Point(Double.parseDouble(coordinatesString[0]), Double.parseDouble(coordinatesString[1]));
+        return coordinatesInt;
     }
 
     public void setBackground() {
 
+        String font = GAME_PROPS.getProperty("font");
+
         // set the restart area image at the right coordinates
-        String[] centreRestart = GAME_PROPS.getProperty("restartarea.prep").split(",");
+        Point coordinatesRestart = getCoordinates("restartarea.prep");
         Image restartArea = new Image("res/restart_area.png");
-        restartArea.draw(Integer.parseInt(centreRestart[0]), Integer.parseInt(centreRestart[1]));
+        restartArea.draw(coordinatesRestart.x, coordinatesRestart.y);
 
         // set the door image at the right place
-        String[] centreDoor = GAME_PROPS.getProperty("door.prep").split(",");
+        Point centreDoor = getCoordinates("door.prep");
         Image door = new Image("res/locked_door.png");
-        door.draw(Integer.parseInt(centreDoor[0]), Integer.parseInt(centreDoor[1]));
+        door.draw(centreDoor.x, centreDoor.y);
 
         // set the title text at the right place with the right font
         int titleFontSize = Integer.parseInt(GAME_PROPS.getProperty("title.fontSize"));
         int titleY = Integer.parseInt(GAME_PROPS.getProperty("title.y"));
         int titleX = Integer.parseInt(GAME_PROPS.getProperty("window.width"));
         String title = MESSAGE_PROPS.getProperty("title");
-        Font titleText = new Font("res/wheaton.otf", titleFontSize);
+        Font titleText = new Font(font, titleFontSize);
         titleText.drawString(title, 250, titleY);
 
         // set the controls text at the right place with the right font
         String moveMessage = MESSAGE_PROPS.getProperty("moveMessage");
         int controlsFontSize = Integer.parseInt(GAME_PROPS.getProperty("prompt.fontSize"));
         int controlsY = Integer.parseInt(GAME_PROPS.getProperty("moveMessage.y"));
-        Font controls = new Font("res/wheaton.otf", controlsFontSize);
+        Font controls = new Font(font, controlsFontSize);
         controls.drawString(moveMessage, 375, controlsY);
+
+        // set the health display at the right place with the right font
+        String healthDisplay = MESSAGE_PROPS.getProperty("healthDisplay");
+        int playerStatsFontSize = Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize"));
+        Point healthCoordinates = getCoordinates("healthStat");
+        Font healthStat = new Font("res/wheaton.otf", playerStatsFontSize);
+        healthStat.drawString(healthDisplay, healthCoordinates.x, healthCoordinates.y);
+
+        // set the coins display at the right place with the right font
+        String coinDisplay = MESSAGE_PROPS.getProperty("coinDisplay");
+        Point coinStatCoordinates = getCoordinates("coinStat");
+        Font coinStat = new Font(font, playerStatsFontSize);
+        coinStat.drawString(coinDisplay, coinStatCoordinates.x, coinStatCoordinates.y);
+
+        double initialHealth = Double.parseDouble(GAME_PROPS.getProperty("initialHealth"));
+        int initialCoins = Integer.parseInt(GAME_PROPS.getProperty("initialCoins"));
     }
 }
