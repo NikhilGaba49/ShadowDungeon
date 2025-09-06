@@ -5,8 +5,8 @@ import java.util.Properties;
 
 public class Player {
 
-    private Properties GAME_PROPS;
-    private Properties MESSAGE_PROPS; // is this static? investigate
+    private final Properties GAME_PROPS;
+    private final Properties MESSAGE_PROPS; // is this static? investigate
 
     private Point coordinates;
     private Image playerImage = new Image("res/player_left.png");
@@ -19,8 +19,10 @@ public class Player {
         return coordinates;
     }
 
-    public void setCoordinates(Point coordinates) {
-        this.coordinates = coordinates;
+    public void setCoordinates(Room room, double x, double y) {
+        if (x>0 && x<room.getWidth() && y>0 && y<room.getHeight()) {
+            coordinates = new Point(x, y);
+        }
     }
 
     public void setPlayerImage(Image playerImage) {
@@ -33,5 +35,4 @@ public class Player {
         String[] coordinates = GAME_PROPS.getProperty("player.start").split(",");
         this.coordinates = new Point(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1]));
     }
-
 }

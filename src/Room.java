@@ -3,22 +3,32 @@ import bagel.util.*;
 
 import java.util.Properties;
 
-public class PrepRoom {
+public class Room {
 
     private boolean isPrepRoom;
-    private Properties GAME_PROPS;
-    private Properties MESSAGE_PROPS;
+    private final Properties GAME_PROPS ;
+    private final Properties MESSAGE_PROPS;
+    private final int height;
+    private final int width;
 
-
-    public PrepRoom(Properties GAME_PROPS, Properties MESSAGE_PROPS) {
+    public Room(Properties GAME_PROPS, Properties MESSAGE_PROPS) {
         this.GAME_PROPS = GAME_PROPS;
         this.MESSAGE_PROPS = MESSAGE_PROPS;
+        this.width = Integer.parseInt(GAME_PROPS.getProperty("window.width"));
+        this.height = Integer.parseInt(GAME_PROPS.getProperty("window.height"));
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     private Point getCoordinates(String property) {
         String[] coordinatesString = GAME_PROPS.getProperty(property).split(",");
-        Point coordinatesInt = new Point(Double.parseDouble(coordinatesString[0]), Double.parseDouble(coordinatesString[1]));
-        return coordinatesInt;
+        return new Point(Double.parseDouble(coordinatesString[0]), Double.parseDouble(coordinatesString[1]));
     }
 
     public void setBackground() {

@@ -29,16 +29,28 @@ public class ShadowDungeon extends AbstractGame {
     @Override
     protected void update(Input input) {
 
-        Image playerImage = player.getPlayerImage();
-        playerImage.draw(player.getCoordinates().x, player.getCoordinates().y);
-
         Image background = new Image("res/background.png");
         background.draw(512, 384);
 
-        PrepRoom room = new PrepRoom(GAME_PROPS, MESSAGE_PROPS);
-        room.setBackground();
+        Image playerImage = player.getPlayerImage();
+        playerImage.draw(player.getCoordinates().x,player.getCoordinates().y);
 
-        if (input.wasPressed(Keys.ESCAPE)) {
+        Room prepRoom = new Room(GAME_PROPS, MESSAGE_PROPS);
+        prepRoom.setBackground();
+
+        if (input.isDown(Keys.W)) {
+            player.setCoordinates(prepRoom, player.getCoordinates().x, player.getCoordinates().y-3);
+        }
+        else if (input.isDown(Keys.A)) {
+            player.setCoordinates(prepRoom,player.getCoordinates().x-3, player.getCoordinates().y);
+        }
+        else if (input.isDown(Keys.S)) {
+            player.setCoordinates(prepRoom, player.getCoordinates().x, player.getCoordinates().y+3);
+        }
+        else if (input.isDown(Keys.D)) {
+            player.setCoordinates(prepRoom, player.getCoordinates().x+3, player.getCoordinates().y);
+        }
+        else if (input.wasPressed(Keys.ESCAPE)) {
             Window.close();
         }
     }
