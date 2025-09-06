@@ -1,5 +1,6 @@
 import bagel.*;
 import bagel.util.Point;
+import bagel.util.Rectangle;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -7,19 +8,33 @@ import java.util.Properties;
 
 public class ShadowDungeon extends AbstractGame {
 
-    private final Properties GAME_PROPS;
-    private final Properties MESSAGE_PROPS;
     private final Player player;
+    private final int speed;
+
+    private final Room[] rooms = new Room[5];
+    private int currentRoomIndex;
 
     public ShadowDungeon(Properties gameProps, Properties messageProps) {
         super(Integer.parseInt(gameProps.getProperty("window.width")),
                 Integer.parseInt(gameProps.getProperty("window.height")),
                 messageProps.getProperty("title"));
 
-        this.GAME_PROPS = gameProps;
-        this.MESSAGE_PROPS = messageProps;
-
         player = new Player(gameProps, messageProps);
+        speed = Integer.parseInt(gameProps.getProperty("movingSpeed"));
+
+        rooms[0] = new Room(gameProps, messageProps);
+        rooms[1] = new Room(gameProps, messageProps);
+        rooms[2] = new Room(gameProps, messageProps);
+        rooms[3] = new Room(gameProps, messageProps);
+    }
+
+    private boolean touchesDoor(Image doorImage, Point doorCoordinates) {
+
+        Rectangle door = doorImage.getBoundingBoxAt(doorCoordinates);
+        return player.getCoordinates().y <= door.bottom() &&
+                player.getCoordinates().y >= door.top() &&
+                player.getCoordinates().x >= door.left() &&
+                player.getCoordinates().x <= door.right();
     }
 
     /**
@@ -29,26 +44,31 @@ public class ShadowDungeon extends AbstractGame {
     @Override
     protected void update(Input input) {
 
-        Image background = new Image("res/background.png");
-        background.draw(512, 384);
+        rooms[currentRoomIndex].setBackground();
 
         Image playerImage = player.getPlayerImage();
         playerImage.draw(player.getCoordinates().x,player.getCoordinates().y);
 
-        Room prepRoom = new Room(GAME_PROPS, MESSAGE_PROPS);
-        prepRoom.setBackground();
+        if (touchesDoor(rooms[currentRoomIndex].getDoorImage(), rooms[currentRoomIndex].getDoorCoordinates())){
+            if (currentRoomIndex == 0) { // also add constraint for unlocked door
+                currentRoomIndex++;
+            }
+        }
 
         if (input.isDown(Keys.W)) {
-            player.setCoordinates(prepRoom, player.getCoordinates().x, player.getCoordinates().y-3);
+            player.setCoordinates(rooms[currentRoomIndex], player.getCoordinates().x, player.getCoordinates().y-speed);
         }
         else if (input.isDown(Keys.A)) {
-            player.setCoordinates(prepRoom,player.getCoordinates().x-3, player.getCoordinates().y);
+            player.setCoordinates(rooms[currentRoomIndex],player.getCoordinates().x-speed, player.getCoordinates().y);
         }
         else if (input.isDown(Keys.S)) {
-            player.setCoordinates(prepRoom, player.getCoordinates().x, player.getCoordinates().y+3);
+            player.setCoordinates(rooms[currentRoomIndex], player.getCoordinates().x, player.getCoordinates().y+speed);
         }
         else if (input.isDown(Keys.D)) {
-            player.setCoordinates(prepRoom, player.getCoordinates().x+3, player.getCoordinates().y);
+            player.setCoordinates(rooms[currentRoomIndex], player.getCoordinates().x+speed, player.getCoordinates().y);
+        }
+        else if (input.wasPressed(Keys.R) && currentRoomIndex == 0) {
+            rooms[currentRoomIndex].setDoorImage("res/unlocked_door.png");
         }
         else if (input.wasPressed(Keys.ESCAPE)) {
             Window.close();
