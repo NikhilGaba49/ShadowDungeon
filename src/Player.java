@@ -1,3 +1,4 @@
+import Rooms.Room;
 import bagel.*;
 import bagel.util.*;
 

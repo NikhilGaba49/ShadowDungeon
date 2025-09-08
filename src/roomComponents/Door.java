@@ -1,3 +1,5 @@
+package roomComponents;
+
 import bagel.*;
 import bagel.util.Point;
 

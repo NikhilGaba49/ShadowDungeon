@@ -1,9 +1,13 @@
+package Rooms;
+
 import bagel.*;
 import bagel.util.*;
+import roomComponents.Door;
 
+import java.util.Arrays;
 import java.util.Properties;
 
-public class Room {
+public abstract class Room {
 
     private final Properties GAME_PROPS;
     private final Properties MESSAGE_PROPS;
@@ -11,20 +15,13 @@ public class Room {
     private final int height;
     private final int width;
 
-    private final Door door;
-
-    public Door getDoor() {
-        return door;
-    }
-
     private final String font;
 
-    public Room(Properties GAME_PROPS, Properties MESSAGE_PROPS, Point doorCoordinates) {
+    public Room(Properties GAME_PROPS, Properties MESSAGE_PROPS) {
         this.GAME_PROPS = GAME_PROPS;
         this.MESSAGE_PROPS = MESSAGE_PROPS;
         this.width = Integer.parseInt(GAME_PROPS.getProperty("window.width"));
         this.height = Integer.parseInt(GAME_PROPS.getProperty("window.height"));
-        this.door = new Door(doorCoordinates);
         this.font = GAME_PROPS.getProperty("font");
     }
 
@@ -41,9 +38,10 @@ public class Room {
         background.draw(width / 2.0, height / 2.0);
     }
 
-    public void setImage(String filename, Point coordinates) {
+    public void setImage(String filename, String property) {
         Image gameObject = new Image(filename);
-        gameObject.draw(coordinates.x, coordinates.y);
+        Point[] coordinates = getCoordinates("restartarea.prep");
+        gameObject.draw(coordinates[0].x, coordinates[0].y);
     }
 
     public void displayTextProperty(String textProperty, String fontSizeProperty, String coordinateX,
@@ -69,4 +67,35 @@ public class Room {
         Font textFont = new Font(font, fontSize);
         textFont.drawString(text, coordinateX, coordinateY);
     }
+
+    public Point[] getCoordinates(String property) {
+
+        final int COMMA_ASCII = 44;
+
+        String[] coordinates = GAME_PROPS.getProperty(property).split(";");
+
+        if (coordinates[0].length() <= 1) {
+            return new Point[]{};
+        }
+        Point[] coordinatePairs = new Point[coordinates.length];
+
+        for (int i=0; i<coordinates.length; i++) {
+
+            String x = coordinates[i].substring(0, coordinates[i].indexOf(COMMA_ASCII));
+            String remainingString = coordinates[i].substring(coordinates[i].indexOf(COMMA_ASCII)+1);
+
+            int indexComma = remainingString.indexOf(COMMA_ASCII);
+            if (indexComma < 0) {
+                indexComma = remainingString.length();
+            }
+            String y = remainingString.substring(0, indexComma);
+
+            coordinatePairs[i] = new Point(Double.parseDouble(x), Double.parseDouble(y));
+        }
+        return coordinatePairs;
+    }
+
+    public abstract void drawDoors();
+    public abstract Door[] getDoors();
+    public abstract void drawWalls();
 }

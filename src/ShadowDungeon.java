@@ -1,3 +1,7 @@
+import Rooms.BattleRoom;
+import Rooms.EdgeRoom;
+import Rooms.Room;
+
 import bagel.*;
 import bagel.util.Point;
 import bagel.util.Rectangle;
@@ -12,13 +16,13 @@ public class ShadowDungeon extends AbstractGame {
     private final Player player;
     private final int speed;
 
-    private final Room[] rooms = new Room[4];
+    private final int NUMBER_ROOMS = 4;
+
+    private final Room[] rooms = new Room[NUMBER_ROOMS];
     private int currentRoomIndex;
 
     private double health;
     private double coins;
-
-    private final String[] doorCoordinates = {"door.prep","primarydoor.A","primarydoor.B","door.end"};
 
     public ShadowDungeon(Properties gameProps, Properties messageProps) {
         super(Integer.parseInt(gameProps.getProperty("window.width")),
@@ -30,11 +34,10 @@ public class ShadowDungeon extends AbstractGame {
         this.player = new Player(gameProps, messageProps);
         this.speed = Integer.parseInt(gameProps.getProperty("movingSpeed"));
 
-        for (int i=0; i<rooms.length; i++) {
-            String[] coordinates = gameProps.getProperty(doorCoordinates[i]).split(",");
-            Point doorCoordinates = new Point(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1]));
-            rooms[i] = new Room(gameProps, messageProps, doorCoordinates);
-        }
+        rooms[0] = new EdgeRoom(GAME_PROPS, MESSAGE_PROPS, "prep");
+        rooms[1] = new BattleRoom(GAME_PROPS, MESSAGE_PROPS, "A");
+        rooms[2] = new BattleRoom(GAME_PROPS, MESSAGE_PROPS, "B");
+        rooms[3] = new EdgeRoom(GAME_PROPS, MESSAGE_PROPS, "end");
 
         this.health = Double.parseDouble(GAME_PROPS.getProperty("initialHealth"));
         this.coins = Integer.parseInt(GAME_PROPS.getProperty("initialCoins"));
@@ -49,11 +52,6 @@ public class ShadowDungeon extends AbstractGame {
                 player.getCoordinates().x <= door.right();
     }
 
-    private Point getCoordinates(String property) {
-        String[] coordinatesString = GAME_PROPS.getProperty(property).split(",");
-        return new Point(Double.parseDouble(coordinatesString[0]), Double.parseDouble(coordinatesString[1]));
-    }
-
     /**
      * Render the relevant screen based on the keyboard input given by the user and the status of the gameplay.
      * @param input The current mouse/keyboard input.
@@ -66,27 +64,22 @@ public class ShadowDungeon extends AbstractGame {
             case 0:
                 rooms[currentRoomIndex].displayTextProperty("title", "title.fontSize", "", "title.y");
                 rooms[currentRoomIndex].displayTextProperty("moveMessage", "prompt.fontSize", "","moveMessage.y");
-                rooms[currentRoomIndex].setImage("res/restart_area.png", getCoordinates("restartarea.prep"));;
+                rooms[currentRoomIndex].setImage("res/restart_area.png", "restartarea.prep");
                 break;
             case 1:
-                String[] walls = GAME_PROPS.getProperty("wall.A").split(";");
-                for (String wall: walls) {
-                    String[] coordinates = wall.split(",");
-                    Point wallCoordinates = new Point(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1]));
-                    rooms[currentRoomIndex].setImage("res/wall.png", wallCoordinates);
-                }
+                rooms[currentRoomIndex].drawWalls();
                 break;
         }
 
         rooms[currentRoomIndex].displayText(MESSAGE_PROPS.getProperty("healthDisplay"), Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")), Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[0]), Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[1]));
         rooms[currentRoomIndex].displayText(MESSAGE_PROPS.getProperty("coinDisplay"), Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")), Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[0]), Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[1]));
-        rooms[currentRoomIndex].getDoor().drawDoor();
+        rooms[currentRoomIndex].drawDoors();
 
         Image playerImage = player.getPlayerImage();
         playerImage.draw(player.getCoordinates().x,player.getCoordinates().y);
 
-        if (touchesObject(rooms[currentRoomIndex].getDoor().getDoorImage(), rooms[currentRoomIndex].getDoor().getDoorCoordinates())) {
-            if (currentRoomIndex == 0 && rooms[currentRoomIndex].getDoor().isDoorUnlocked()) {
+        if (touchesObject(rooms[currentRoomIndex].getDoors()[0].getDoorImage(), rooms[currentRoomIndex].getDoors()[0].getDoorCoordinates())) {
+            if (currentRoomIndex == 0 && rooms[currentRoomIndex].getDoors()[0].isDoorUnlocked()) {
                 currentRoomIndex++;
             }
         }
@@ -104,7 +97,7 @@ public class ShadowDungeon extends AbstractGame {
             player.setCoordinates(rooms[currentRoomIndex], player.getCoordinates().x+speed, player.getCoordinates().y);
         }
         else if (input.wasPressed(Keys.R) && currentRoomIndex == 0) {
-            rooms[currentRoomIndex].getDoor().setDoorUnlocked();
+            rooms[currentRoomIndex].getDoors()[0].setDoorUnlocked();
         }
         else if (input.wasPressed(Keys.ESCAPE)) {
             Window.close();
