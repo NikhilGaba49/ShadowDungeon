@@ -1,5 +1,6 @@
 package Rooms;
 
+import Game.Player;
 import bagel.*;
 import bagel.util.*;
 import roomComponents.Door;
@@ -97,5 +98,13 @@ public abstract class Room {
 
     public abstract void drawDoors();
     public abstract Door[] getDoors();
-    public abstract void drawWalls();
+    public abstract void drawStationaryObjects();
+
+    public boolean touchesObject(Player player, Image objectImage, Point objectCoordinates) {
+        Rectangle door = objectImage.getBoundingBoxAt(objectCoordinates);
+        return player.getPosition().y <= door.bottom() &&
+                player.getPosition().y >= door.top() &&
+                player.getPosition().x >= door.left() &&
+                player.getPosition().x <= door.right();
+    }
 }

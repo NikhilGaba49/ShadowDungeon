@@ -1,10 +1,10 @@
+package Game;
+
 import Rooms.BattleRoom;
 import Rooms.EdgeRoom;
 import Rooms.Room;
 
 import bagel.*;
-import bagel.util.Point;
-import bagel.util.Rectangle;
 
 import java.util.Properties;
 
@@ -43,15 +43,6 @@ public class ShadowDungeon extends AbstractGame {
         this.coins = Integer.parseInt(GAME_PROPS.getProperty("initialCoins"));
     }
 
-    private boolean touchesObject(Image objectImage, Point objectCoordinates) {
-
-        Rectangle door = objectImage.getBoundingBoxAt(objectCoordinates);
-        return player.getCoordinates().y <= door.bottom() &&
-                player.getCoordinates().y >= door.top() &&
-                player.getCoordinates().x >= door.left() &&
-                player.getCoordinates().x <= door.right();
-    }
-
     /**
      * Render the relevant screen based on the keyboard input given by the user and the status of the gameplay.
      * @param input The current mouse/keyboard input.
@@ -67,7 +58,7 @@ public class ShadowDungeon extends AbstractGame {
                 rooms[currentRoomIndex].setImage("res/restart_area.png", "restartarea.prep");
                 break;
             case 1:
-                rooms[currentRoomIndex].drawWalls();
+                rooms[currentRoomIndex].drawStationaryObjects();
                 break;
         }
 
@@ -76,25 +67,32 @@ public class ShadowDungeon extends AbstractGame {
         rooms[currentRoomIndex].drawDoors();
 
         Image playerImage = player.getPlayerImage();
-        playerImage.draw(player.getCoordinates().x,player.getCoordinates().y);
+        playerImage.draw(player.getPosition().x,player.getPosition().y);
 
-        if (touchesObject(rooms[currentRoomIndex].getDoors()[0].getDoorImage(), rooms[currentRoomIndex].getDoors()[0].getDoorCoordinates())) {
-            if (currentRoomIndex == 0 && rooms[currentRoomIndex].getDoors()[0].isDoorUnlocked()) {
+        if (rooms[currentRoomIndex] instanceof EdgeRoom) {
+            EdgeRoom room = (EdgeRoom) rooms[currentRoomIndex];
+            if (room.touchesDoor(player) && currentRoomIndex == 0) {
+                currentRoomIndex++;
+            }
+        }
+        else if (rooms[currentRoomIndex] instanceof BattleRoom) {
+            BattleRoom room = (BattleRoom) rooms[currentRoomIndex];
+            if (room.touchesEnemy(player)) {
                 currentRoomIndex++;
             }
         }
 
         if (input.isDown(Keys.W)) {
-            player.setCoordinates(rooms[currentRoomIndex], player.getCoordinates().x, player.getCoordinates().y-speed);
+            player.setCoordinates(rooms[currentRoomIndex], player.getPosition().x, player.getPosition().y-speed);
         }
         else if (input.isDown(Keys.A)) {
-            player.setCoordinates(rooms[currentRoomIndex],player.getCoordinates().x-speed, player.getCoordinates().y);
+            player.setCoordinates(rooms[currentRoomIndex],player.getPosition().x-speed, player.getPosition().y);
         }
         else if (input.isDown(Keys.S)) {
-            player.setCoordinates(rooms[currentRoomIndex], player.getCoordinates().x, player.getCoordinates().y+speed);
+            player.setCoordinates(rooms[currentRoomIndex], player.getPosition().x, player.getPosition().y+speed);
         }
         else if (input.isDown(Keys.D)) {
-            player.setCoordinates(rooms[currentRoomIndex], player.getCoordinates().x+speed, player.getCoordinates().y);
+            player.setCoordinates(rooms[currentRoomIndex], player.getPosition().x+speed, player.getPosition().y);
         }
         else if (input.wasPressed(Keys.R) && currentRoomIndex == 0) {
             rooms[currentRoomIndex].getDoors()[0].setDoorUnlocked();

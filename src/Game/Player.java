@@ -1,3 +1,5 @@
+package Game;
+
 import Rooms.Room;
 import bagel.*;
 import bagel.util.*;
@@ -16,7 +18,7 @@ public class Player {
         return playerImage;
     }
 
-    public Point getCoordinates() {
+    public Point getPosition() {
         return coordinates;
     }
 

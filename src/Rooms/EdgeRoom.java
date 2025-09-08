@@ -1,12 +1,13 @@
 package Rooms;
 
+import Game.Player;
 import roomComponents.Door;
 
 import java.util.Properties;
 
 public class EdgeRoom extends Room {
 
-    private Door door;
+    private final Door door;
 
     public EdgeRoom(Properties GAME_PROPS, Properties MESSAGE_PROPS, String room) {
         super(GAME_PROPS, MESSAGE_PROPS);
@@ -25,8 +26,12 @@ public class EdgeRoom extends Room {
     }
 
     @Override
-    public void drawWalls() { // remember to fix up later
+    public void drawStationaryObjects() {
         return;
+    }
+
+    public boolean touchesDoor(Player player) {
+        return touchesObject(player, door.getDoorImage(), door.getDoorCoordinates());
     }
 
 }

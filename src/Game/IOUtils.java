@@ -1,7 +1,8 @@
+package Game;
+
 import bagel.util.Point;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Properties;
 
 /**
