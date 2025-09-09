@@ -22,22 +22,22 @@ public class BattleRoom extends Room {
 
         String primaryDoorStem = "primarydoor.";
         String secondaryDoorStem = "secondarydoor.";
-        primaryDoor = new Door(getCoordinates(primaryDoorStem.concat(room))[0]);
-        secondaryDoor = new Door(getCoordinates(secondaryDoorStem.concat(room))[0]);
+        primaryDoor = new Door(getCoordinates(primaryDoorStem.concat(room), GAME_PROPS)[0]);
+        secondaryDoor = new Door(getCoordinates(secondaryDoorStem.concat(room), GAME_PROPS)[0]);
 
-        walls = new StationaryObjects[getCoordinates("wall.".concat(room)).length];
+        walls = new StationaryObjects[getCoordinates("wall.".concat(room), GAME_PROPS).length];
         for (int i=0; i<walls.length; i++) {
-            walls[i] = new StationaryObjects(getCoordinates("wall.".concat(room))[i], "res/wall.png");
+            walls[i] = new StationaryObjects(getCoordinates("wall.".concat(room), GAME_PROPS)[i], "res/wall.png");
         }
 
-        rivers = new StationaryObjects[getCoordinates("river.".concat(room)).length];
+        rivers = new StationaryObjects[getCoordinates("river.".concat(room), GAME_PROPS).length];
         for (int i=0; i<rivers.length; i++) {
-            rivers[i] = new StationaryObjects(getCoordinates("river.".concat(room))[i], "res/river.png");
+            rivers[i] = new StationaryObjects(getCoordinates("river.".concat(room), GAME_PROPS)[i], "res/river.png");
         }
 
-        enemies = new StationaryObjects[getCoordinates("keyBulletKin.".concat(room)).length];
+        enemies = new StationaryObjects[getCoordinates("keyBulletKin.".concat(room), GAME_PROPS).length];
         for (int i=0; i<enemies.length; i++) {
-            enemies[i] = new StationaryObjects(getCoordinates("keyBulletKin.".concat(room))[i], "res/key_bullet_kin.png");
+            enemies[i] = new StationaryObjects(getCoordinates("keyBulletKin.".concat(room), GAME_PROPS)[i], "res/key_bullet_kin.png");
         }
     }
 
@@ -94,6 +94,24 @@ public class BattleRoom extends Room {
         }
         return riverImages;
     }
+
+    public Point[] getWallCoords() {
+        Point[] wallCoordinates = new Point[walls.length];
+        for (int i=0; i<walls.length; i++) {
+            wallCoordinates[i] = walls[i].getPositionCoordinates();
+        }
+        return wallCoordinates;
+    }
+
+    public Image[] getWallImages() {
+        Image[] wallImages = new Image[walls.length];
+        for (int i=0; i<walls.length; i++) {
+            wallImages[i] = walls[i].getWallImage();
+        }
+        return wallImages;
+    }
+
+
 
     public Point[] getEnemyCoords() {
         Point[] enemyCoordinates = new Point[enemies.length];

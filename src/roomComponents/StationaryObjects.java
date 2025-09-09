@@ -36,4 +36,11 @@ public class StationaryObjects {
         }
         return null;
     }
+
+    public Image getWallImage() {
+        if (filename.equals("res/wall.png")) {
+            return object;
+        }
+        return null;
+    }
 }

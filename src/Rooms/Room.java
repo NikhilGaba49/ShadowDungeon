@@ -41,7 +41,7 @@ public abstract class Room {
 
     public void setImage(String filename, String property) {
         Image gameObject = new Image(filename);
-        Point[] coordinates = getCoordinates("restartarea.prep");
+        Point[] coordinates = getCoordinates("restartarea.prep", GAME_PROPS);
         gameObject.draw(coordinates[0].x, coordinates[0].y);
     }
 
@@ -75,7 +75,7 @@ public abstract class Room {
         textFont.drawString(text, coordinateX, coordinateY);
     }
 
-    public Point[] getCoordinates(String property) {
+    public static Point[] getCoordinates(String property, Properties GAME_PROPS) {
 
         final int COMMA_ASCII = 44;
 

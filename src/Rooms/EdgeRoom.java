@@ -15,7 +15,7 @@ public class EdgeRoom extends Room {
         super(GAME_PROPS, MESSAGE_PROPS);
 
         String roomPropertyStem = "door.";
-        door = new Door(getCoordinates(roomPropertyStem.concat(room))[0]);
+        door = new Door(getCoordinates(roomPropertyStem.concat(room), GAME_PROPS)[0]);
     }
 
     @Override
@@ -31,8 +31,12 @@ public class EdgeRoom extends Room {
         return new Point[]{door.getDoorCoordinates()};
     }
 
-    public Image[] getDoorImages(){
-        return door.getDoorImages();
+    public Image[] getUnlockedDoorImages(){
+        return door.getUnlockedDoorImages();
+    }
+
+    public Image[] getLockedDoorImages(){
+        return door.getLockedDoorImages();
     }
 
     @Override

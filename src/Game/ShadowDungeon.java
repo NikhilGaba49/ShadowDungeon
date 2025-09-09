@@ -100,12 +100,20 @@ public class ShadowDungeon extends AbstractGame {
         Image playerImage = player.getPlayerImage();
         playerImage.draw(player.getPosition().x,player.getPosition().y);
 
+        Image[] wallImages = null;
+        Point[] wallCoords = null;
+        Image[] lockedDoorImages = null;
+        Point[] doorCoords = null;
+
         if (rooms[currentRoomIndex] instanceof EdgeRoom) {
             EdgeRoom room = (EdgeRoom) rooms[currentRoomIndex];
-            Image[] doorImages = room.getDoorImages();
-            Point[] doorCoords = room.getDoorCoords();
-            if (player.touchesObject(doorImages, doorCoords) && currentRoomIndex == 0) {
-                currentRoomIndex++;
+            Image[] unlockedDoorImages = room.getUnlockedDoorImages();
+            doorCoords = room.getDoorCoords();
+            lockedDoorImages = room.getLockedDoorImages();
+            if (unlockedDoorImages != null) {
+                if (player.touchesObject(unlockedDoorImages, doorCoords) && currentRoomIndex == 0 && room.getDoors()[0].isDoorUnlocked()) {
+                    currentRoomIndex++;
+                }
             }
         } else if (rooms[currentRoomIndex] instanceof BattleRoom) {
             BattleRoom room = (BattleRoom) rooms[currentRoomIndex];
@@ -113,17 +121,24 @@ public class ShadowDungeon extends AbstractGame {
             Point[] enemyCoords = room.getEnemyCoords();
             Image[] riverImages = room.getRiverImages();
             Point[] riverCoords = room.getRiverCoords();
+            wallImages = room.getWallImages();
+            wallCoords = room.getWallCoords();
+
             if (player.touchesObject(enemyImages, enemyCoords)) {
                 currentRoomIndex++;
             }
-            if (player.touchesObject(riverImages, riverCoords)) {
+            else if (player.touchesObject(riverImages, riverCoords)) {
                 health -= HEALTH_DECREASE;
+                // this was inspired from a StackOverflow question
                 health = Math.round((health * 10)) / 10.0;
-
             }
         }
-        player.movePlayer(input, rooms[currentRoomIndex], SPEED);
-
+        if (rooms[currentRoomIndex] instanceof BattleRoom) {
+            player.movePlayer(input, rooms[currentRoomIndex], SPEED, wallImages, wallCoords);
+        }
+        else {
+            player.movePlayer(input, rooms[currentRoomIndex], SPEED, lockedDoorImages, doorCoords);
+        }
         if (input.wasPressed(Keys.R) && currentRoomIndex == 0) {
             rooms[currentRoomIndex].getDoors()[0].setDoorUnlocked();
         }

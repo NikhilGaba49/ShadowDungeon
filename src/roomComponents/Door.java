@@ -24,8 +24,18 @@ public class Door {
         return doorUnlocked;
     }
 
-    public Image[] getDoorImages() {
-        return new Image[]{doorImage};
+    public Image[] getUnlockedDoorImages() {
+        if (doorUnlocked) {
+            return new Image[]{doorImage};
+        }
+        return null;
+    }
+
+    public Image[] getLockedDoorImages() {
+        if (!doorUnlocked) {
+            return new Image[]{doorImage};
+        }
+        return null;
     }
 
     public Point getDoorCoordinates() {
