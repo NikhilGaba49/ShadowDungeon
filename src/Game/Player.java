@@ -8,6 +8,8 @@ import java.util.Properties;
 
 public class Player {
 
+    private int currentRoomIndex;
+
     private final Properties GAME_PROPS;
     private final Properties MESSAGE_PROPS; // is this static? investigate
 
@@ -37,5 +39,17 @@ public class Player {
         this.MESSAGE_PROPS = MESSAGE_PROPS;
         String[] coordinates = GAME_PROPS.getProperty("player.start").split(",");
         this.coordinates = new Point(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1]));
+    }
+
+    public void movePlayer(Input input, Room room, int SPEED) {
+        if (input.isDown(Keys.W)) {
+            setCoordinates(room, getPosition().x, getPosition().y - SPEED);
+        } else if (input.isDown(Keys.A)) {
+            setCoordinates(room, getPosition().x - SPEED, getPosition().y);
+        } else if (input.isDown(Keys.S)) {
+            setCoordinates(room, getPosition().x, getPosition().y + SPEED);
+        } else if (input.isDown(Keys.D)) {
+            setCoordinates(room, getPosition().x + SPEED, getPosition().y);
+        }
     }
 }

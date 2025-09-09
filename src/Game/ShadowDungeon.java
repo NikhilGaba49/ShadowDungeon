@@ -14,9 +14,11 @@ public class ShadowDungeon extends AbstractGame {
     private final Properties MESSAGE_PROPS;
 
     private final Player player;
-    private final int speed;
+    public final int SPEED ;
 
     private final int NUMBER_ROOMS = 4;
+
+    private final boolean gameWon;
 
     private final Room[] rooms = new Room[NUMBER_ROOMS];
     private int currentRoomIndex;
@@ -28,11 +30,12 @@ public class ShadowDungeon extends AbstractGame {
         super(Integer.parseInt(gameProps.getProperty("window.width")),
                 Integer.parseInt(gameProps.getProperty("window.height")),
                 messageProps.getProperty("title"));
+
         this.GAME_PROPS = gameProps;
         this.MESSAGE_PROPS = messageProps;
 
         this.player = new Player(gameProps, messageProps);
-        this.speed = Integer.parseInt(gameProps.getProperty("movingSpeed"));
+        this.SPEED = Integer.parseInt(gameProps.getProperty("movingSpeed"));
 
         rooms[0] = new EdgeRoom(GAME_PROPS, MESSAGE_PROPS, "prep");
         rooms[1] = new BattleRoom(GAME_PROPS, MESSAGE_PROPS, "A");
@@ -41,6 +44,7 @@ public class ShadowDungeon extends AbstractGame {
 
         this.health = Double.parseDouble(GAME_PROPS.getProperty("initialHealth"));
         this.coins = Integer.parseInt(GAME_PROPS.getProperty("initialCoins"));
+        this.gameWon = false;
     }
 
     /**
@@ -57,11 +61,13 @@ public class ShadowDungeon extends AbstractGame {
                 rooms[currentRoomIndex].displayTextProperty("moveMessage", "prompt.fontSize", "","moveMessage.y");
                 rooms[currentRoomIndex].setImage("res/restart_area.png", "restartarea.prep");
                 break;
-            case 1:
+            case (1), (2):
                 rooms[currentRoomIndex].drawStationaryObjects();
                 break;
+            case (3):
+                rooms[currentRoomIndex].displayTextProperty("gameEnd.lost", "title.fontSize", "", "title.y");
+                rooms[currentRoomIndex].setImage("res/restart_area.png", "restartarea.prep");
         }
-
         rooms[currentRoomIndex].displayText(MESSAGE_PROPS.getProperty("healthDisplay"), Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")), Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[0]), Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[1]));
         rooms[currentRoomIndex].displayText(MESSAGE_PROPS.getProperty("coinDisplay"), Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")), Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[0]), Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[1]));
         rooms[currentRoomIndex].drawDoors();
@@ -74,27 +80,16 @@ public class ShadowDungeon extends AbstractGame {
             if (room.touchesDoor(player) && currentRoomIndex == 0) {
                 currentRoomIndex++;
             }
-        }
-        else if (rooms[currentRoomIndex] instanceof BattleRoom) {
+        } else if (rooms[currentRoomIndex] instanceof BattleRoom) {
             BattleRoom room = (BattleRoom) rooms[currentRoomIndex];
             if (room.touchesEnemy(player)) {
                 currentRoomIndex++;
             }
         }
 
-        if (input.isDown(Keys.W)) {
-            player.setCoordinates(rooms[currentRoomIndex], player.getPosition().x, player.getPosition().y-speed);
-        }
-        else if (input.isDown(Keys.A)) {
-            player.setCoordinates(rooms[currentRoomIndex],player.getPosition().x-speed, player.getPosition().y);
-        }
-        else if (input.isDown(Keys.S)) {
-            player.setCoordinates(rooms[currentRoomIndex], player.getPosition().x, player.getPosition().y+speed);
-        }
-        else if (input.isDown(Keys.D)) {
-            player.setCoordinates(rooms[currentRoomIndex], player.getPosition().x+speed, player.getPosition().y);
-        }
-        else if (input.wasPressed(Keys.R) && currentRoomIndex == 0) {
+        player.movePlayer(input, rooms[currentRoomIndex], SPEED);
+
+        if (input.wasPressed(Keys.R) && currentRoomIndex == 0) {
             rooms[currentRoomIndex].getDoors()[0].setDoorUnlocked();
         }
         else if (input.wasPressed(Keys.ESCAPE)) {

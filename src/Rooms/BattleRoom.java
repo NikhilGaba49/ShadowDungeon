@@ -4,6 +4,7 @@ import Game.Player;
 import bagel.Image;
 import roomComponents.*;
 
+import java.util.Arrays;
 import java.util.Properties;
 
 public class BattleRoom extends Room {
@@ -12,9 +13,8 @@ public class BattleRoom extends Room {
     Door secondaryDoor;
 
     StationaryObjects[] walls;
+    StationaryObjects[] rivers;
     StationaryObjects[] enemies;
-
-    River[] rivers;
 
     public BattleRoom(Properties GAME_PROPS, Properties MESSAGE_PROPS, String room) {
         super(GAME_PROPS, MESSAGE_PROPS);
@@ -27,6 +27,11 @@ public class BattleRoom extends Room {
         walls = new StationaryObjects[getCoordinates("wall.".concat(room)).length];
         for (int i=0; i<walls.length; i++) {
             walls[i] = new StationaryObjects(getCoordinates("wall.".concat(room))[i], "res/wall.png");
+        }
+
+        rivers = new StationaryObjects[getCoordinates("river.".concat(room)).length];
+        for (int i=0; i<rivers.length; i++) {
+            rivers[i] = new StationaryObjects(getCoordinates("river.".concat(room))[i], "res/river.png");
         }
 
         enemies = new StationaryObjects[getCoordinates("keyBulletKin.".concat(room)).length];
@@ -48,11 +53,14 @@ public class BattleRoom extends Room {
 
     @Override
     public void drawStationaryObjects() {
-        for (StationaryObjects object: walls) {
-            object.drawObject();
+        for (StationaryObjects wall: walls) {
+            wall.drawObject();
         }
-        for (StationaryObjects object: enemies) {
-            object.drawObject();
+        for (StationaryObjects enemy: enemies) {
+            enemy.drawObject();
+        }
+        for (StationaryObjects river: rivers) {
+            river.drawObject();
         }
     }
 
@@ -61,6 +69,8 @@ public class BattleRoom extends Room {
     }
 
     public boolean touchesEnemy(Player player) {
+//        primaryDoor.setDoorUnlocked();
+//        secondaryDoor.setDoorUnlocked();
         return touchesObject(player, enemies[0].getEnemyImage(), enemies[0].getPositionCoordinates());
     }
 }
