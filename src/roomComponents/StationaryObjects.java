@@ -30,4 +30,10 @@ public class StationaryObjects {
         }
         return null;
     }
+    public Image getRiverImage() {
+        if (filename.equals("res/river.png")) {
+            return object;
+        }
+        return null;
+    }
 }

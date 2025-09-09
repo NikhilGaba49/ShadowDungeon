@@ -1,6 +1,8 @@
 package Rooms;
 
 import Game.Player;
+import bagel.Image;
+import bagel.util.Point;
 import roomComponents.Door;
 
 import java.util.Properties;
@@ -25,13 +27,16 @@ public class EdgeRoom extends Room {
         return new Door[]{door};
     }
 
+    public Point[] getDoorCoords() {
+        return new Point[]{door.getDoorCoordinates()};
+    }
+
+    public Image[] getDoorImages(){
+        return door.getDoorImages();
+    }
+
     @Override
     public void drawStationaryObjects() {
         return;
     }
-
-    public boolean touchesDoor(Player player) {
-        return touchesObject(player, door.getDoorImage(), door.getDoorCoordinates());
-    }
-
 }

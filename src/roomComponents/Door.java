@@ -24,8 +24,8 @@ public class Door {
         return doorUnlocked;
     }
 
-    public Image getDoorImage() {
-        return doorImage;
+    public Image[] getDoorImages() {
+        return new Image[]{doorImage};
     }
 
     public Point getDoorCoordinates() {

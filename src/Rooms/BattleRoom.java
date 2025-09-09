@@ -2,6 +2,7 @@ package Rooms;
 
 import Game.Player;
 import bagel.Image;
+import bagel.util.Point;
 import roomComponents.*;
 
 import java.util.Arrays;
@@ -64,13 +65,41 @@ public class BattleRoom extends Room {
         }
     }
 
-    public Image getEnemy() {
-        return enemies[0].getEnemyImage();
+    @Override
+    public Point[] getDoorCoords() {
+        return new Point[]{primaryDoor.getDoorCoordinates(), secondaryDoor.getDoorCoordinates()};
     }
 
-    public boolean touchesEnemy(Player player) {
-//        primaryDoor.setDoorUnlocked();
-//        secondaryDoor.setDoorUnlocked();
-        return touchesObject(player, enemies[0].getEnemyImage(), enemies[0].getPositionCoordinates());
+    public Image[] getEnemyImages() {
+        Image[] enemyImages = new Image[enemies.length];
+        for (int i=0; i<enemies.length; i++) {
+            enemyImages[i] = enemies[i].getEnemyImage();
+        }
+        return enemyImages;
+    }
+
+    public Point[] getRiverCoords() {
+        Point[] riverCoordinates = new Point[rivers.length];
+        for (int i=0; i<rivers.length; i++) {
+            riverCoordinates[i] = rivers[i].getPositionCoordinates();
+        }
+        return riverCoordinates;
+    }
+
+
+    public Image[] getRiverImages() {
+        Image[] riverImages = new Image[rivers.length];
+        for (int i=0; i<rivers.length; i++) {
+            riverImages[i] = rivers[i].getRiverImage();
+        }
+        return riverImages;
+    }
+
+    public Point[] getEnemyCoords() {
+        Point[] enemyCoordinates = new Point[enemies.length];
+        for (int i=0; i<enemies.length; i++) {
+            enemyCoordinates[i] = enemies[i].getPositionCoordinates();
+        }
+        return enemyCoordinates;
     }
 }

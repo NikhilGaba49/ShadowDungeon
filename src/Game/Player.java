@@ -52,4 +52,17 @@ public class Player {
             setCoordinates(room, getPosition().x + SPEED, getPosition().y);
         }
     }
+
+    public boolean touchesObject(Image[] objectImage, Point[] objectCoordinates) {
+
+        Rectangle door;
+        for (int i=0; i<objectImage.length; i++) {
+            door = objectImage[i].getBoundingBoxAt(objectCoordinates[i]);
+            if (getPosition().y <= door.bottom() && getPosition().y >= door.top() &&
+                    getPosition().x >= door.left() && getPosition().x <= door.right()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

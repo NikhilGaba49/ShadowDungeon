@@ -64,6 +64,12 @@ public abstract class Room {
         textFont.drawString(text, xCoordinate, yCoordinate);
     }
 
+    public void displayText(String text, int fontSize, double coordinateX, double coordinateY, String previousText) {
+        Font textFont = new Font(font, fontSize);
+        coordinateX += 1.25*textFont.getWidth(previousText);
+        displayText(text, fontSize, coordinateX, coordinateY);
+    }
+
     public void displayText(String text, int fontSize, double coordinateX, double coordinateY) {
         Font textFont = new Font(font, fontSize);
         textFont.drawString(text, coordinateX, coordinateY);
@@ -99,12 +105,5 @@ public abstract class Room {
     public abstract void drawDoors();
     public abstract Door[] getDoors();
     public abstract void drawStationaryObjects();
-
-    public boolean touchesObject(Player player, Image objectImage, Point objectCoordinates) {
-        Rectangle door = objectImage.getBoundingBoxAt(objectCoordinates);
-        return player.getPosition().y <= door.bottom() &&
-                player.getPosition().y >= door.top() &&
-                player.getPosition().x >= door.left() &&
-                player.getPosition().x <= door.right();
-    }
+    public abstract Point[] getDoorCoords();
 }
