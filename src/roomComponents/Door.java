@@ -24,9 +24,9 @@ public class Door {
         return doorUnlocked;
     }
 
-    public Image[] getUnlockedDoorImages() {
+    public Image getUnlockedDoorImages() {
         if (doorUnlocked) {
-            return new Image[]{doorImage};
+            return doorImage;
         }
         return null;
     }

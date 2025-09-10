@@ -17,6 +17,7 @@ public abstract class Room {
     private final int width;
 
     private final String font;
+    private final Image background = new Image("res/background.png");
 
     public Room(Properties GAME_PROPS, Properties MESSAGE_PROPS) {
         this.GAME_PROPS = GAME_PROPS;
@@ -35,8 +36,11 @@ public abstract class Room {
     }
 
     public void setBackground() {
-        final Image background = new Image("res/background.png");
         background.draw(width / 2.0, height / 2.0);
+    }
+
+    public Image getBackground() {
+        return background;
     }
 
     public void setImage(String filename, String property) {
@@ -106,4 +110,6 @@ public abstract class Room {
     public abstract Door[] getDoors();
     public abstract void drawStationaryObjects();
     public abstract Point[] getDoorCoords();
+    public abstract void setDoorsUnlocked();
+    public abstract Image[] getUnlockedImages();
 }

@@ -37,6 +37,13 @@ public class StationaryObjects {
         return null;
     }
 
+    public Image getTreasureBoxImage() {
+        if (filename.equals("res/treasure_box.png")) {
+            return object;
+        }
+        return null;
+    }
+
     public Image getWallImage() {
         if (filename.equals("res/wall.png")) {
             return object;

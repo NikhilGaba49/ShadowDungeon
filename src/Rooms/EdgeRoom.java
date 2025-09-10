@@ -31,8 +31,16 @@ public class EdgeRoom extends Room {
         return new Point[]{door.getDoorCoordinates()};
     }
 
-    public Image[] getUnlockedDoorImages(){
-        return door.getUnlockedDoorImages();
+    @Override
+    public void setDoorsUnlocked() {
+        door.setDoorUnlocked();
+    }
+
+    public Image[] getUnlockedImages(){
+        if (door.isDoorUnlocked()) {
+            return new Image[]{door.getUnlockedDoorImages()};
+        }
+        return null;
     }
 
     public Image[] getLockedDoorImages(){

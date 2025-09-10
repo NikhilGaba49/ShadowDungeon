@@ -16,6 +16,7 @@ public class BattleRoom extends Room {
     StationaryObjects[] walls;
     StationaryObjects[] rivers;
     StationaryObjects[] enemies;
+    StationaryObjects[] treasureBoxes;
 
     public BattleRoom(Properties GAME_PROPS, Properties MESSAGE_PROPS, String room) {
         super(GAME_PROPS, MESSAGE_PROPS);
@@ -39,6 +40,11 @@ public class BattleRoom extends Room {
         for (int i=0; i<enemies.length; i++) {
             enemies[i] = new StationaryObjects(getCoordinates("keyBulletKin.".concat(room), GAME_PROPS)[i], "res/key_bullet_kin.png");
         }
+
+        treasureBoxes = new StationaryObjects[getCoordinates("treasurebox.".concat(room), GAME_PROPS).length];
+        for (int i=0; i<treasureBoxes.length; i++) {
+            treasureBoxes[i] = new StationaryObjects(getCoordinates("treasurebox.".concat(room), GAME_PROPS)[i], "res/treasure_box.png");
+        }
     }
 
     @Override
@@ -49,7 +55,15 @@ public class BattleRoom extends Room {
 
     @Override
     public Door[] getDoors() {
-        return new Door[]{primaryDoor, secondaryDoor};
+        return new Door[]{secondaryDoor, primaryDoor};
+    }
+
+    public void setTreasureBoxes() {
+        StationaryObjects[] newTreasureBoxes = new StationaryObjects[treasureBoxes.length-1];
+        for (int i=0; i< newTreasureBoxes.length; i++) {
+            newTreasureBoxes[i] = treasureBoxes[i+1];
+        }
+        treasureBoxes = newTreasureBoxes;
     }
 
     @Override
@@ -63,6 +77,22 @@ public class BattleRoom extends Room {
         for (StationaryObjects river: rivers) {
             river.drawObject();
         }
+        for (StationaryObjects treasureBox: treasureBoxes) {
+            treasureBox.drawObject();
+        }
+    }
+
+    public void setDoorsUnlocked() {
+        primaryDoor.setDoorUnlocked();
+        secondaryDoor.setDoorUnlocked();
+    }
+
+    @Override
+    public Image[] getUnlockedImages() {
+        if (primaryDoor.isDoorUnlocked()) {
+            return new Image[]{primaryDoor.getUnlockedDoorImages(), secondaryDoor.getUnlockedDoorImages()};
+        }
+        return null;
     }
 
     @Override
@@ -77,6 +107,13 @@ public class BattleRoom extends Room {
         }
         return enemyImages;
     }
+    public Image[] getTreasureBoxImages() {
+        Image[] treasureBoxImages = new Image[treasureBoxes.length];
+        for (int i=0; i<treasureBoxes.length; i++) {
+            treasureBoxImages[i] = treasureBoxes[i].getTreasureBoxImage();
+        }
+        return treasureBoxImages;
+    }
 
     public Point[] getRiverCoords() {
         Point[] riverCoordinates = new Point[rivers.length];
@@ -86,6 +123,13 @@ public class BattleRoom extends Room {
         return riverCoordinates;
     }
 
+    public Point[] getTreasureBoxCoords() {
+        Point[] treasureBoxCoords = new Point[treasureBoxes.length];
+        for (int i=0; i<treasureBoxes.length; i++) {
+            treasureBoxCoords[i] = treasureBoxes[i].getPositionCoordinates();
+        }
+        return treasureBoxCoords;
+    }
 
     public Image[] getRiverImages() {
         Image[] riverImages = new Image[rivers.length];
@@ -110,8 +154,6 @@ public class BattleRoom extends Room {
         }
         return wallImages;
     }
-
-
 
     public Point[] getEnemyCoords() {
         Point[] enemyCoordinates = new Point[enemies.length];
