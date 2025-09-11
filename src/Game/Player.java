@@ -17,6 +17,13 @@ public class Player {
     private Point coordinates;
     private Image playerImage = new Image("res/player_left.png");
 
+    public Player(Properties GAME_PROPS, Properties MESSAGE_PROPS){
+        this.GAME_PROPS = GAME_PROPS;
+        this.MESSAGE_PROPS = MESSAGE_PROPS;
+        String[] coordinates = GAME_PROPS.getProperty("player.start").split(",");
+        this.coordinates = new Point(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1]));
+    }
+
     public Image getPlayerImage() {
         return playerImage;
     }
@@ -36,13 +43,6 @@ public class Player {
 
     public void setPlayerImage(Image playerImage) {
         this.playerImage = playerImage;
-    }
-
-    public Player(Properties GAME_PROPS, Properties MESSAGE_PROPS){
-        this.GAME_PROPS = GAME_PROPS;
-        this.MESSAGE_PROPS = MESSAGE_PROPS;
-        String[] coordinates = GAME_PROPS.getProperty("player.start").split(",");
-        this.coordinates = new Point(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1]));
     }
 
     public void movePlayer(Input input, Room room, int SPEED, Image[] obstacleImages, Point[] obstacleCoordinates) {
