@@ -6,10 +6,7 @@ import Rooms.Room;
 
 import bagel.*;
 import bagel.util.Point;
-import roomComponents.Door;
-import roomComponents.StationaryObjects;
 
-import java.util.Arrays;
 import java.util.Properties;
 
 public class ShadowDungeon extends AbstractGame {

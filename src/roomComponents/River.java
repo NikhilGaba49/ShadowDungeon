@@ -1,24 +1,14 @@
 package roomComponents;
 
-import bagel.Image;
 import bagel.util.Point;
 
-public class River {
-    public static class Enemy {
+/* Similar to enemy, defined as a separate class because of potentially extending
+* functionality for Project 2 upon discussion with Stefan. */
+public class River extends StationaryObject{
 
-        private Point coordinates;
-        private final String filename = "res/key_bullet_kin.png";
-
-        public Enemy(Point coordinates) {
-            this.coordinates = coordinates;
-        }
-
-        public void drawWall() {
-            Image wall = new Image(filename);
-            System.out.println(coordinates.x);
-            System.out.println(coordinates.y);
-            wall.draw(coordinates.x, coordinates.y);
-        }
-
+    // initialise the river with the correct file
+    public River(Point coordinates) {
+        super(coordinates, "res/river.png");
     }
+
 }

@@ -5,10 +5,12 @@ import bagel.util.Point;
 
 public class Door {
 
+    // instance variables describing the state of the door
     private boolean doorUnlocked;
     private Image doorImage;
     private final Point doorCoordinates;
 
+    // constructor
     public Door(Point doorCoordinates) {
         this.doorCoordinates = doorCoordinates;
         this.doorImage = new Image("res/locked_door.png");

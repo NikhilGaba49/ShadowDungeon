@@ -1,11 +1,10 @@
 package Rooms;
 
-import Game.Player;
 import bagel.Image;
 import bagel.util.Point;
+import org.lwjgl.system.linux.Stat;
 import roomComponents.*;
 
-import java.util.Arrays;
 import java.util.Properties;
 
 public class BattleRoom extends Room {
@@ -13,10 +12,10 @@ public class BattleRoom extends Room {
     Door primaryDoor;
     Door secondaryDoor;
 
-    StationaryObjects[] walls;
-    StationaryObjects[] rivers;
-    StationaryObjects[] enemies;
-    StationaryObjects[] treasureBoxes;
+    StationaryObject[] walls;
+    StationaryObject[] rivers;
+    StationaryObject[] enemies;
+    StationaryObject[] treasureBoxes;
     int[] treasureRewards;
 
     public BattleRoom(Properties GAME_PROPS, Properties MESSAGE_PROPS, String room) {
@@ -27,24 +26,24 @@ public class BattleRoom extends Room {
         primaryDoor = new Door(getCoordinates(primaryDoorStem.concat(room), GAME_PROPS)[0]);
         secondaryDoor = new Door(getCoordinates(secondaryDoorStem.concat(room), GAME_PROPS)[0]);
 
-        walls = new StationaryObjects[getCoordinates("wall.".concat(room), GAME_PROPS).length];
+        walls = new Wall[getCoordinates("wall.".concat(room), GAME_PROPS).length];
         for (int i=0; i<walls.length; i++) {
-            walls[i] = new StationaryObjects(getCoordinates("wall.".concat(room), GAME_PROPS)[i], "res/wall.png");
+            walls[i] = new Wall(getCoordinates("wall.".concat(room), GAME_PROPS)[i]);
         }
 
-        rivers = new StationaryObjects[getCoordinates("river.".concat(room), GAME_PROPS).length];
+        rivers = new River[getCoordinates("river.".concat(room), GAME_PROPS).length];
         for (int i=0; i<rivers.length; i++) {
-            rivers[i] = new StationaryObjects(getCoordinates("river.".concat(room), GAME_PROPS)[i], "res/river.png");
+            rivers[i] = new River(getCoordinates("river.".concat(room), GAME_PROPS)[i]);
         }
 
-        enemies = new StationaryObjects[getCoordinates("keyBulletKin.".concat(room), GAME_PROPS).length];
+        enemies = new Enemy[getCoordinates("keyBulletKin.".concat(room), GAME_PROPS).length];
         for (int i=0; i<enemies.length; i++) {
-            enemies[i] = new StationaryObjects(getCoordinates("keyBulletKin.".concat(room), GAME_PROPS)[i], "res/key_bullet_kin.png");
+            enemies[i] = new Enemy(getCoordinates("keyBulletKin.".concat(room), GAME_PROPS)[i]);
         }
 
-        treasureBoxes = new StationaryObjects[getCoordinates("treasurebox.".concat(room), GAME_PROPS).length];
+        treasureBoxes = new TreasureBox[getCoordinates("treasurebox.".concat(room), GAME_PROPS).length];
         for (int i=0; i<treasureBoxes.length; i++) {
-            treasureBoxes[i] = new StationaryObjects(getCoordinates("treasurebox.".concat(room), GAME_PROPS)[i], "res/treasure_box.png");
+            treasureBoxes[i] = new TreasureBox(getCoordinates("treasurebox.".concat(room), GAME_PROPS)[i]);
         }
         treasureRewards = new int[treasureBoxes.length];
         String[] rewards = GAME_PROPS.getProperty("treasurebox.".concat(room)).split(";");
@@ -65,25 +64,23 @@ public class BattleRoom extends Room {
     }
 
     public void setTreasureBoxes() {
-        StationaryObjects[] newTreasureBoxes = new StationaryObjects[treasureBoxes.length-1];
-        for (int i=0; i< newTreasureBoxes.length; i++) {
-            newTreasureBoxes[i] = treasureBoxes[i+1];
-        }
+        StationaryObject[] newTreasureBoxes = new TreasureBox[treasureBoxes.length-1];
+        System.arraycopy(treasureBoxes, 1, newTreasureBoxes, 0, newTreasureBoxes.length);
         treasureBoxes = newTreasureBoxes;
     }
 
     @Override
     public void drawStationaryObjects() {
-        for (StationaryObjects wall: walls) {
+        for (StationaryObject wall: walls) {
             wall.drawObject();
         }
-        for (StationaryObjects enemy: enemies) {
+        for (StationaryObject enemy: enemies) {
             enemy.drawObject();
         }
-        for (StationaryObjects river: rivers) {
+        for (StationaryObject river: rivers) {
             river.drawObject();
         }
-        for (StationaryObjects treasureBox: treasureBoxes) {
+        for (StationaryObject treasureBox: treasureBoxes) {
             treasureBox.drawObject();
         }
     }
@@ -109,14 +106,14 @@ public class BattleRoom extends Room {
     public Image[] getEnemyImages() {
         Image[] enemyImages = new Image[enemies.length];
         for (int i=0; i<enemies.length; i++) {
-            enemyImages[i] = enemies[i].getEnemyImage();
+            enemyImages[i] = enemies[i].getImage();
         }
         return enemyImages;
     }
     public Image[] getTreasureBoxImages() {
         Image[] treasureBoxImages = new Image[treasureBoxes.length];
         for (int i=0; i<treasureBoxes.length; i++) {
-            treasureBoxImages[i] = treasureBoxes[i].getTreasureBoxImage();
+            treasureBoxImages[i] = treasureBoxes[i].getImage();
         }
         return treasureBoxImages;
     }
@@ -137,7 +134,7 @@ public class BattleRoom extends Room {
         return treasureBoxCoords;
     }
 
-    public StationaryObjects[] getTreasureBoxes() {
+    public StationaryObject[] getTreasureBoxes() {
         return treasureBoxes;
     }
 
@@ -146,7 +143,7 @@ public class BattleRoom extends Room {
     }
 
 
-    public int removeElement(StationaryObjects[] objects, Point toRemove) {
+    public int removeElement(StationaryObject[] objects, Point toRemove) {
         int indexRemove= objects.length;
         for (int i=0; i<objects.length; i++) {
             if (objects[i].getPositionCoordinates().equals(toRemove)) {
@@ -154,7 +151,7 @@ public class BattleRoom extends Room {
             }
         }
         int treasureRewardCoins = treasureRewards[indexRemove];
-        StationaryObjects[] newTreasureBoxes = new StationaryObjects[objects.length-1];
+        StationaryObject[] newTreasureBoxes = new TreasureBox[objects.length-1];
         int[] newTreasureRewards = new int[objects.length-1];
         for (int i=0; i<indexRemove; i++) {
             newTreasureBoxes[i] = objects[i];
@@ -172,7 +169,7 @@ public class BattleRoom extends Room {
     public Image[] getRiverImages() {
         Image[] riverImages = new Image[rivers.length];
         for (int i=0; i<rivers.length; i++) {
-            riverImages[i] = rivers[i].getRiverImage();
+            riverImages[i] = rivers[i].getImage();
         }
         return riverImages;
     }
@@ -188,7 +185,7 @@ public class BattleRoom extends Room {
     public Image[] getWallImages() {
         Image[] wallImages = new Image[walls.length];
         for (int i=0; i<walls.length; i++) {
-            wallImages[i] = walls[i].getWallImage();
+            wallImages[i] = walls[i].getImage();
         }
         return wallImages;
     }
@@ -202,7 +199,7 @@ public class BattleRoom extends Room {
     }
 
     public void setEnemies() {
-        StationaryObjects[] newEnemies = new StationaryObjects[enemies.length-1];
+        StationaryObject[] newEnemies = new StationaryObject[enemies.length-1];
         for (int i=0; i< newEnemies.length; i++) {
             newEnemies[i] = enemies[i+1];
         }
