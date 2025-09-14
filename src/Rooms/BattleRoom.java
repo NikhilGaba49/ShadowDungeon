@@ -3,7 +3,6 @@ package Rooms;
 import Game.Player;
 import bagel.Image;
 import bagel.util.Point;
-import org.lwjgl.system.linux.Stat;
 import roomComponents.*;
 
 import java.util.Properties;
@@ -37,6 +36,8 @@ public class BattleRoom extends Room {
                                     GAME_PROPS)[0]);
         secondaryDoor = new Door(getCoordinates("secondarydoor.".concat(room),
                                     GAME_PROPS)[0]);
+
+        primaryDoor.setDoorUnlocked();
 
         // initiate stationary objects for the battle room
         walls = initiateArrays(GAME_PROPS, "wall.", room);
@@ -101,8 +102,8 @@ public class BattleRoom extends Room {
     * doors and walls. Returns a boolean truth value. */
     public boolean touchesObstacles(Player player, Point nextMove) {
 
+        // used to determine length of obstacles array
         int numberDoorsLocked = 0;
-
         if (!primaryDoor.isDoorUnlocked()) {
             numberDoorsLocked++;
         }
@@ -121,15 +122,40 @@ public class BattleRoom extends Room {
             obstacleImages[i] = walls[i].getImage();
             obstacleCoordinates[i] = walls[i].getPositionCoordinates();
         }
+        // adding the primary & secondary locked doors to obstacle images
         if (!primaryDoor.isDoorUnlocked()) {
             obstacleImages[i] = primaryDoor.getImage();
             obstacleCoordinates[i] = primaryDoor.getPositionCoordinates();
+            i++;
         }
         if (!secondaryDoor.isDoorUnlocked()) {
             obstacleImages[i] = secondaryDoor.getImage();
             obstacleCoordinates[i] = secondaryDoor.getPositionCoordinates();
         }
-        return player.touchesObstacle(obstacleImages, obstacleCoordinates, nextMove)[0] == 1;
+        // does the next move of the player touch any of the above obstacles?
+        return player.touchesObstacle(obstacleImages, obstacleCoordinates,
+                                            nextMove)[0] == 1;
+    }
+
+    /* checks whether the player is colliding with any unlocked door. If only
+    * one door is unlocked, this means that room has just been changed, so we
+    * should not change room instead. Returns a boolean array, with first index
+    * being if the player intersects with any of the unlocked doors and the
+    * second index is if both doors are unlocked in the room. */
+    @Override
+    public boolean[] touchesUnlockedDoor(Player player) {
+
+        if (primaryDoor.isDoorUnlocked() && secondaryDoor.isDoorUnlocked()) {
+            Image[] unlockedDoorImages = {primaryDoor.getImage(), secondaryDoor.getImage()};
+            Point[] unlockedDoorCoordinates = {primaryDoor.getPositionCoordinates(), secondaryDoor.getPositionCoordinates()};
+            return new boolean[] {player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition())[0] == 1, true};
+        }
+        else if (primaryDoor.isDoorUnlocked()) {
+            Image[] unlockedDoorImages = {primaryDoor.getImage()};
+            Point[] unlockedDoorCoordinates = {primaryDoor.getPositionCoordinates()};
+            return new boolean[] {player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition())[0] == 1, false};
+        }
+        return new boolean[] {false, primaryDoor.isDoorUnlocked() && secondaryDoor.isDoorUnlocked()};
     }
 
     @Override
@@ -165,6 +191,10 @@ public class BattleRoom extends Room {
     public void setDoorsUnlocked() {
         primaryDoor.setDoorUnlocked();
         secondaryDoor.setDoorUnlocked();
+    }
+
+    public void setDoorLocked() {
+        primaryDoor.setDoorLocked();
     }
 
 

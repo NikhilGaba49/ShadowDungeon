@@ -100,34 +100,6 @@ public class ShadowDungeon extends AbstractGame {
         Image playerImage = player.getPlayerImage();
         playerImage.draw(player.getPosition().x, player.getPosition().y);
 
-        if (roomChange) {
-            if (currentRoomIndex == 1) {
-                player.setCoordinates(rooms[currentRoomIndex], 512, 720);
-            } else if (currentRoomIndex == 0) {
-                player.setCoordinates(rooms[currentRoomIndex], 512, 272);
-            } else if (currentRoomIndex == 2) {
-                player.setCoordinates(rooms[currentRoomIndex], 992, 384);
-            } else {
-                player.setCoordinates(rooms[currentRoomIndex], 992, 384);
-            }
-        }
-        roomChange = false;
-
-//        int[] touchesResult = player.touchesObstacle(treasureBoxImages, treasureBoxCoords, player.getPosition());
-
-//        if (player.touchesObject(enemyImages, enemyCoords)) {
-//            rooms[currentRoomIndex].setDoorsUnlocked();
-//            ((BattleRoom) rooms[currentRoomIndex]).setEnemies();
-//        } else if (player.touchesObject(riverImages, riverCoords)) {
-//            health -= HEALTH_DECREASE;
-//            // this was inspired from a StackOverflow question
-//            health = Math.round((health * 10)) / 10.0;
-//        } else if (touchesResult[0] == 1) {
-//            BattleRoom battleRoom = (BattleRoom) rooms[currentRoomIndex];
-//            int reward = (battleRoom.removeElement(battleRoom.getTreasureBoxes(), treasureBoxCoords[touchesResult[1]]));
-//            coins += reward;
-//        }
-
         // add functionality for player to face the mouse position
         player.movePlayer(input, rooms[currentRoomIndex], player, SPEED);
         if (input.getMousePosition().x >= player.getPosition().x) {
@@ -135,6 +107,19 @@ public class ShadowDungeon extends AbstractGame {
         }
         else if (input.getMousePosition().x < player.getPosition().x) {
             player.setPlayerImage("res/player_left.png");
+        }
+
+        // checks if the player collides with unlocked door & both doors are unlocked
+        if (rooms[currentRoomIndex].touchesUnlockedDoor(player)[0]
+                && rooms[currentRoomIndex].touchesUnlockedDoor(player)[1]) {
+            currentRoomIndex++;
+            player.setCoordinates(rooms[currentRoomIndex], 512, 720);
+            roomChange=true;
+        }
+        // logic to lock door if you move away from unlocked door after room change
+        else if (rooms[currentRoomIndex] instanceof BattleRoom
+                && !(rooms[currentRoomIndex].touchesUnlockedDoor(player)[0])) {
+            rooms[currentRoomIndex].setDoorLocked();
         }
 
         if (input.wasPressed(Keys.R) && currentRoomIndex == 0) {
@@ -159,3 +144,19 @@ public class ShadowDungeon extends AbstractGame {
         game.run();
     }
 }
+
+
+//        int[] touchesResult = player.touchesObstacle(treasureBoxImages, treasureBoxCoords, player.getPosition());
+
+//        if (player.touchesObject(enemyImages, enemyCoords)) {
+//            rooms[currentRoomIndex].setDoorsUnlocked();
+//            ((BattleRoom) rooms[currentRoomIndex]).setEnemies();
+//        } else if (player.touchesObject(riverImages, riverCoords)) {
+//            health -= HEALTH_DECREASE;
+//            // this was inspired from a StackOverflow question
+//            health = Math.round((health * 10)) / 10.0;
+//        } else if (touchesResult[0] == 1) {
+//            BattleRoom battleRoom = (BattleRoom) rooms[currentRoomIndex];
+//            int reward = (battleRoom.removeElement(battleRoom.getTreasureBoxes(), treasureBoxCoords[touchesResult[1]]));
+//            coins += reward;
+//        }

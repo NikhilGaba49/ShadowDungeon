@@ -19,6 +19,15 @@ public class EdgeRoom extends Room {
         door = new Door(getCoordinates(roomPropertyStem.concat(room), GAME_PROPS)[0]);
     }
 
+    public boolean[] touchesUnlockedDoor(Player player) {
+        if (door.isDoorUnlocked()) {
+            Image[] unlockedDoorImages = {door.getImage()};
+            Point[] unlockedDoorCoordinates = {door.getPositionCoordinates()};
+            return new boolean[] {player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition())[0] == 1, true};
+        }
+        return new boolean[] {false};
+    }
+
     @Override
     public void drawDoors() {
         door.drawObject();
@@ -27,6 +36,10 @@ public class EdgeRoom extends Room {
     @Override
     public void setDoorsUnlocked() {
         door.setDoorUnlocked();
+    }
+
+    public void setDoorLocked() {
+        door.setDoorLocked();
     }
 
     @Override

@@ -110,4 +110,6 @@ public abstract class Room {
     public abstract void drawStationaryObjects();
     public abstract void setDoorsUnlocked();
     public abstract boolean touchesObstacles(Player player, Point nextMove);
+    public abstract boolean[] touchesUnlockedDoor(Player player);
+    public abstract void setDoorLocked();
 }
