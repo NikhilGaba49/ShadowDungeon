@@ -18,14 +18,14 @@ public class BattleRoom extends Room {
     // each battle room can have multiple of these stationary objects in them
     private final StationaryObject[] walls;
     private final StationaryObject[] rivers;
-    private final StationaryObject[] enemies;
+    private StationaryObject[] enemies;
     private StationaryObject[] treasureBoxes;
 
     public final int COIN_REWARD_INDEX = 2;
 
     // instantiate a specific battle room (either A or B) as indicated by room
     public BattleRoom(Properties GAME_PROPS, Properties MESSAGE_PROPS,
-                        String room) {
+                      String room) {
 
         // initiate common functionality in Room
         super(GAME_PROPS, MESSAGE_PROPS);
@@ -33,9 +33,9 @@ public class BattleRoom extends Room {
         // a structured way to extract the coordinates for the primary door and
         // the secondary door from GAME_PROPS regardless of room A or room B
         primaryDoor = new Door(getCoordinates("primarydoor.".concat(room),
-                                    GAME_PROPS)[0]);
+                GAME_PROPS)[0]);
         secondaryDoor = new Door(getCoordinates("secondarydoor.".concat(room),
-                                    GAME_PROPS)[0]);
+                GAME_PROPS)[0]);
 
         primaryDoor.setDoorUnlocked();
 
@@ -53,10 +53,10 @@ public class BattleRoom extends Room {
                 "treasurebox.".concat(room)).split(";");
 
         // assign a new treasure box object to each element in array
-        for (int i=0; i<treasureBoxes.length; i++) {
+        for (int i = 0; i < treasureBoxes.length; i++) {
             treasureBoxes[i] = new TreasureBox(
-                getCoordinates("treasurebox.".concat(room), GAME_PROPS)[i],
-                Integer.parseInt(rewards[i].split(",")[COIN_REWARD_INDEX]));
+                    getCoordinates("treasurebox.".concat(room), GAME_PROPS)[i],
+                    Integer.parseInt(rewards[i].split(",")[COIN_REWARD_INDEX]));
         }
     }
 
@@ -64,28 +64,28 @@ public class BattleRoom extends Room {
     of object, as specified by object, a string.
      */
     public static StationaryObject[] initiateArrays(Properties GAME_PROPS,
-                                            String object, String room) {
+                                                    String object, String room) {
 
         StationaryObject[] objects;
         Point[] coordinates = getCoordinates(object.concat(room), GAME_PROPS);
 
-        // a switch statement to determine which type of objects to initialise
+        // to determine which type of objects to initialise
         switch (object) {
             case ("wall."):
                 objects = new Wall[coordinates.length];
-                for (int i=0; i<objects.length; i++) {
+                for (int i = 0; i < objects.length; i++) {
                     objects[i] = new Wall(coordinates[i]);
                 }
                 break;
-            case("river."):
+            case ("river."):
                 objects = new River[coordinates.length];
-                for (int i=0; i<objects.length; i++) {
+                for (int i = 0; i < objects.length; i++) {
                     objects[i] = new River(coordinates[i]);
                 }
                 break;
-            case("keyBulletKin."):
+            case ("keyBulletKin."):
                 objects = new Enemy[coordinates.length];
-                for (int i=0; i<objects.length; i++) {
+                for (int i = 0; i < objects.length; i++) {
                     objects[i] = new Enemy(coordinates[i]);
                 }
                 break;
@@ -97,9 +97,10 @@ public class BattleRoom extends Room {
         return objects; // returning initialised array
     }
 
+
     /* We need to check if the player, currently in this battle room, is
-    * going to collide with any obstacles in the gameplay, including locked
-    * doors and walls. Returns a boolean truth value. */
+     * going to collide with any obstacles in the gameplay, including locked
+     * doors and walls. Returns a boolean truth value. */
     public boolean touchesObstacles(Player player, Point nextMove) {
 
         // used to determine length of obstacles array
@@ -118,7 +119,7 @@ public class BattleRoom extends Room {
 
         // obstacle image and obstacle coordinates will correspond by index
         int i;
-        for (i=0; i<walls.length; i++) {
+        for (i = 0; i < walls.length; i++) {
             obstacleImages[i] = walls[i].getImage();
             obstacleCoordinates[i] = walls[i].getPositionCoordinates();
         }
@@ -134,59 +135,102 @@ public class BattleRoom extends Room {
         }
         // does the next move of the player touch any of the above obstacles?
         return player.touchesObstacle(obstacleImages, obstacleCoordinates,
-                                            nextMove)[0] == 1;
+                nextMove)[0] == 1;
     }
 
     /* checks whether the player is colliding with any unlocked door. If only
-    * one door is unlocked, this means that room has just been changed, so we
-    * should not change room instead. Returns a boolean array, with first index
-    * being if the player intersects with any of the unlocked doors and the
-    * second index is if both doors are unlocked in the room. */
+     * one door is unlocked, this means that room has just been changed, so we
+     * should not change room instead. Returns a boolean array, with first index
+     * being if the player intersects with any of the unlocked doors and the
+     * second index is if both doors are unlocked in the room. */
     @Override
     public boolean[] touchesUnlockedDoor(Player player) {
 
         if (primaryDoor.isDoorUnlocked() && secondaryDoor.isDoorUnlocked()) {
             Image[] unlockedDoorImages = {primaryDoor.getImage(), secondaryDoor.getImage()};
             Point[] unlockedDoorCoordinates = {primaryDoor.getPositionCoordinates(), secondaryDoor.getPositionCoordinates()};
-            return new boolean[] {player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition())[0] == 1, true};
-        }
-        else if (primaryDoor.isDoorUnlocked()) {
+            return new boolean[]{player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition())[0] == 1, true};
+        } else if (primaryDoor.isDoorUnlocked()) {
             Image[] unlockedDoorImages = {primaryDoor.getImage()};
             Point[] unlockedDoorCoordinates = {primaryDoor.getPositionCoordinates()};
-            return new boolean[] {player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition())[0] == 1, false};
+            return new boolean[]{player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition())[0] == 1, false};
         }
-        return new boolean[] {false, primaryDoor.isDoorUnlocked() && secondaryDoor.isDoorUnlocked()};
+        return new boolean[]{false, primaryDoor.isDoorUnlocked() && secondaryDoor.isDoorUnlocked()};
     }
 
-    @Override
-    public void drawDoors() {
-        primaryDoor.drawObject();
-        secondaryDoor.drawObject();
+    /* Checks whether the player touches a specific treasure box. Appropriate
+    number of coin rewards are returned and the treasure box is removed from
+    the array.
+     */
+    public int touchesTreasureBoxes(Player player) {
+
+        Image[] treasureBoxesImages = new Image[treasureBoxes.length];
+        Point[] treasureBoxCoordinates = new Point[treasureBoxes.length];
+        for (int i = 0; i < treasureBoxes.length; i++) {
+            treasureBoxesImages[i] = treasureBoxes[i].getImage();
+            treasureBoxCoordinates[i] = treasureBoxes[i].getPositionCoordinates();
+        }
+        int[] touchesResult = player.touchesObstacle(treasureBoxesImages,
+                treasureBoxCoordinates, player.getPosition());
+        if (touchesResult[0] == 1) { // the player is colliding with a treasure box
+            int coinRewards = ((TreasureBox) treasureBoxes[touchesResult[1]]).getCoinReward();
+            treasureBoxes = removeIndex(treasureBoxes, touchesResult[1]);
+            return coinRewards;
+        }
+        return touchesResult[0];
+    }
+
+    public void touchesEnemy(Player player) {
+        Image[] enemyImages = new Image[enemies.length];
+        Point[] enemyCoordinates = new Point[enemies.length];
+        for (int i = 0; i < enemies.length; i++) {
+            enemyImages[i] = enemies[i].getImage();
+            enemyCoordinates[i] = enemies[i].getPositionCoordinates();
+        }
+        int[] touchesResult = player.touchesObstacle(enemyImages, enemyCoordinates, player.getPosition());
+        if (touchesResult[0] == 1){
+            enemies = removeIndex(enemies, touchesResult[1]);
+            setDoorsUnlocked();
+        }
+    }
+
+    /* this method takes an array of stationary objects and removes the object
+    at some given position. returns the new objects array. */
+    public static StationaryObject[] removeIndex(StationaryObject[] objects, int indexToRemove) {
+        assert (indexToRemove < objects.length && indexToRemove > 0);
+        StationaryObject[] newObjects = new StationaryObject[objects.length-1];
+        System.arraycopy(objects, 0, newObjects, 0, indexToRemove);
+        if (objects.length - (indexToRemove + 1) >= 0)
+            System.arraycopy(objects, indexToRemove + 1, newObjects, indexToRemove + 1 - 1, objects.length - (indexToRemove + 1));
+        return newObjects;
     }
 
     // to set game play for a battle room, these objects must be displayed
     @Override
     public void drawStationaryObjects() {
-        for (StationaryObject wall: walls) {
+
+        primaryDoor.drawObject();
+        secondaryDoor.drawObject();
+
+        for (StationaryObject wall : walls) {
             wall.drawObject();
         }
-        for (StationaryObject enemy: enemies) {
+        for (StationaryObject enemy : enemies) {
             enemy.drawObject();
         }
-        for (StationaryObject river: rivers) {
+        for (StationaryObject river : rivers) {
             river.drawObject();
         }
-        for (StationaryObject treasureBox: treasureBoxes) {
+        for (StationaryObject treasureBox : treasureBoxes) {
             treasureBox.drawObject();
         }
     }
 
     public void setTreasureBoxes() {
-        StationaryObject[] newTreasureBoxes = new TreasureBox[treasureBoxes.length-1];
+        StationaryObject[] newTreasureBoxes = new TreasureBox[treasureBoxes.length - 1];
         System.arraycopy(treasureBoxes, 1, newTreasureBoxes, 0, newTreasureBoxes.length);
         treasureBoxes = newTreasureBoxes;
     }
-
 
     public void setDoorsUnlocked() {
         primaryDoor.setDoorUnlocked();
@@ -197,39 +241,7 @@ public class BattleRoom extends Room {
         primaryDoor.setDoorLocked();
     }
 
-
     public StationaryObject[] getTreasureBoxes() {
         return treasureBoxes;
     }
-
-
-//    public int removeElement(StationaryObject[] objects, Point toRemove) {
-//        int indexRemove= objects.length;
-//        for (int i=0; i<objects.length; i++) {
-//            if (objects[i].getPositionCoordinates().equals(toRemove)) {
-//                indexRemove = i;
-//            }
-//        }
-//        int treasureRewardCoins = treasureRewards[indexRemove];
-//        StationaryObject[] newTreasureBoxes = new TreasureBox[objects.length-1];
-//        int[] newTreasureRewards = new int[objects.length-1];
-//        for (int i=0; i<indexRemove; i++) {
-//            newTreasureBoxes[i] = objects[i];
-//            newTreasureRewards[i] = treasureRewards[i];
-//        }
-//        for (int i=indexRemove+1; i<objects.length; i++) {
-//            newTreasureBoxes[i-1] = objects[i];
-//            newTreasureRewards[i-1] = treasureRewards[i];
-//        }
-//        treasureBoxes = newTreasureBoxes;
-//        treasureRewards = newTreasureRewards;
-//        return treasureRewardCoins;
-    }
-
-//    public void setEnemies() {
-//        StationaryObject[] newEnemies = new StationaryObject[enemies.length-1];
-//        for (int i=0; i< newEnemies.length; i++) {
-//            newEnemies[i] = enemies[i+1];
-//        }
-//        enemies = newEnemies;
-//    }
+}

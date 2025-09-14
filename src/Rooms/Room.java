@@ -106,7 +106,6 @@ public abstract class Room {
         return coordinatePairs;
     }
 
-    public abstract void drawDoors();
     public abstract void drawStationaryObjects();
     public abstract void setDoorsUnlocked();
     public abstract boolean touchesObstacles(Player player, Point nextMove);

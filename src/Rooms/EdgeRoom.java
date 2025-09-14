@@ -29,11 +29,6 @@ public class EdgeRoom extends Room {
     }
 
     @Override
-    public void drawDoors() {
-        door.drawObject();
-    }
-
-    @Override
     public void setDoorsUnlocked() {
         door.setDoorUnlocked();
     }
@@ -54,6 +49,6 @@ public class EdgeRoom extends Room {
 
     @Override
     public void drawStationaryObjects() {
-        return;
+        door.drawObject();
     }
 }

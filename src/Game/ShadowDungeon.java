@@ -71,12 +71,11 @@ public class ShadowDungeon extends AbstractGame {
                 rooms[currentRoomIndex].displayTextProperty("moveMessage", "prompt.fontSize", "", "moveMessage.y");
                 rooms[currentRoomIndex].setImage("res/restart_area.png", "restartarea.prep");
                 break;
-            case (1), (2):
-                rooms[currentRoomIndex].drawStationaryObjects();
-                break;
+
             case (3):
                 rooms[currentRoomIndex].displayTextProperty("gameEnd.lost", "title.fontSize", "", "title.y");
                 rooms[currentRoomIndex].setImage("res/restart_area.png", "restartarea.prep");
+                break;
         }
         rooms[currentRoomIndex].displayText(MESSAGE_PROPS.getProperty("healthDisplay"),
                 Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")),
@@ -95,7 +94,7 @@ public class ShadowDungeon extends AbstractGame {
                 Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[0]),
                 Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[1]),
                 MESSAGE_PROPS.getProperty("coinDisplay"));
-        rooms[currentRoomIndex].drawDoors();
+        rooms[currentRoomIndex].drawStationaryObjects();
 
         Image playerImage = player.getPlayerImage();
         playerImage.draw(player.getPosition().x, player.getPosition().y);
@@ -118,13 +117,25 @@ public class ShadowDungeon extends AbstractGame {
         }
         // logic to lock door if you move away from unlocked door after room change
         else if (rooms[currentRoomIndex] instanceof BattleRoom
-                && !(rooms[currentRoomIndex].touchesUnlockedDoor(player)[0])) {
+                && !(rooms[currentRoomIndex].touchesUnlockedDoor(player)[0])
+                && !(rooms[currentRoomIndex].touchesUnlockedDoor(player)[1])) {
             rooms[currentRoomIndex].setDoorLocked();
         }
 
+        if (rooms[currentRoomIndex] instanceof BattleRoom) {
+            BattleRoom currentRoom = (BattleRoom) rooms[currentRoomIndex];
+            if (input.wasPressed(Keys.ENTER)) {
+                coins += currentRoom.touchesTreasureBoxes(player);
+            }
+            currentRoom.touchesEnemy(player);
+        }
+
+        // setting door unlocked for the prep room
         if (input.wasPressed(Keys.R) && currentRoomIndex == 0) {
             rooms[currentRoomIndex].setDoorsUnlocked();
-        } else if (input.wasPressed(Keys.ESCAPE)) {
+        }
+        // end game window command
+        else if (input.wasPressed(Keys.ESCAPE)) {
             Window.close();
         }
     }

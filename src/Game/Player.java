@@ -81,12 +81,4 @@ public class Player {
         }
         return new int[]{0, -1};
     }
-
-    public boolean touchesObject(Image[] objectImage, Point[] objectCoordinates) {
-        if (objectImage == null) {
-            return false;
-        }
-        int[] output = touchesObstacle(objectImage, objectCoordinates, coordinates);
-        return output[0] == 1;
-    }
 }
