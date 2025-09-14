@@ -3,9 +3,6 @@ package Rooms;
 import Game.Player;
 import bagel.*;
 import bagel.util.*;
-import roomComponents.Door;
-
-import java.util.Arrays;
 import java.util.Properties;
 
 public abstract class Room {
@@ -113,20 +110,26 @@ public abstract class Room {
     public abstract void setDoorLocked();
     public abstract Point getDoorCoordinates();
 
-    public void displayRoom(double health, double coins) {
+    public void displayRoom(double health, double coins, int roomIndex, boolean gameWon) {
+
+        setBackground();
         drawStationaryObjects();
+
         displayText(MESSAGE_PROPS.getProperty("healthDisplay"),
                 Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")),
                 Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[0]),
                 Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[1]));
+
         displayText(MESSAGE_PROPS.getProperty("coinDisplay"),
                 Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")),
                 Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[0]),
                 Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[1]));
+
         displayText(Double.toString(health),
                 Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")), Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[0]),
                 Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[1]),
                 MESSAGE_PROPS.getProperty("healthDisplay"));
+
         displayText(Double.toString(coins),
                 Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")),
                 Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[0]),

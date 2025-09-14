@@ -6,8 +6,9 @@ import bagel.util.Point;
 import roomComponents.Door;
 import roomComponents.RestartArea;
 
-import java.util.Arrays;
 import java.util.Properties;
+
+import static Game.ShadowDungeon.NUMBER_ROOMS;
 
 public class EdgeRoom extends Room {
 
@@ -20,7 +21,31 @@ public class EdgeRoom extends Room {
         String roomPropertyStem = "door.";
         door = new Door(getCoordinates(roomPropertyStem.concat(room), GAME_PROPS)[0]);
         restartArea = new RestartArea(getCoordinates("restartarea.".concat(room), GAME_PROPS)[0]);
+
+        door.setDoorUnlocked();
     }
+
+    @Override
+    public void displayRoom(double health, double coins, int roomIndex, boolean gameWon) {
+
+        super.displayRoom(health, coins, roomIndex, gameWon);
+
+        switch (roomIndex){
+            case(0):
+                displayTextProperty("title", "title.fontSize", "", "title.y");
+                displayTextProperty("moveMessage", "prompt.fontSize", "", "moveMessage.y");
+                break;
+            case(NUMBER_ROOMS-1):
+                if (gameWon) {
+                    displayTextProperty("gameEnd.won", "title.fontSize", "", "title.y");
+                }
+                else {
+                    displayTextProperty("gameEnd.lost", "title.fontSize", "", "title.y");
+                }
+                break;
+        }
+    }
+
 
     public boolean[] touchesUnlockedDoor(Player player) {
         if (door.isDoorUnlocked()) {

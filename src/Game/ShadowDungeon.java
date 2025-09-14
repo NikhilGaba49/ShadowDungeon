@@ -17,18 +17,16 @@ public class ShadowDungeon extends AbstractGame {
     private final Player player;
     public final int SPEED ;
 
-    private static final int NUMBER_ROOMS = 4;
+    public static final int NUMBER_ROOMS = 4;
     private final double HEALTH_DECREASE;
 
-    private final boolean gameWon;
+    private boolean gameWon;
 
     private Room[] rooms;
     private int currentRoomIndex;
 
     private double health;
     private double coins;
-
-    private boolean roomChange = false;
 
     public ShadowDungeon(Properties gameProps, Properties messageProps) {
         super(Integer.parseInt(gameProps.getProperty("window.width")),
@@ -39,6 +37,7 @@ public class ShadowDungeon extends AbstractGame {
         this.MESSAGE_PROPS = messageProps;
 
         this.rooms = instantiateRooms(GAME_PROPS, MESSAGE_PROPS);
+        rooms[0].setDoorLocked();
 
         this.health = Double.parseDouble(GAME_PROPS.getProperty("initialHealth"));
         this.coins = Integer.parseInt(GAME_PROPS.getProperty("initialCoins"));
@@ -70,29 +69,21 @@ public class ShadowDungeon extends AbstractGame {
 
         if (health < 0) {
             currentRoomIndex = NUMBER_ROOMS - 1;
+            rooms[currentRoomIndex].setDoorLocked();
         }
 
-        switch (currentRoomIndex) {
-            case 0:
-                rooms[currentRoomIndex].displayTextProperty("title", "title.fontSize", "", "title.y");
-                rooms[currentRoomIndex].displayTextProperty("moveMessage", "prompt.fontSize", "", "moveMessage.y");
-                break;
-
-            case (3):
-                rooms[currentRoomIndex].displayTextProperty("gameEnd.lost", "title.fontSize", "", "title.y");
-                break;
-        }
         if (rooms[currentRoomIndex] instanceof EdgeRoom && input.wasPressed(Keys.ENTER)) {
             EdgeRoom currentRoom = (EdgeRoom) rooms[currentRoomIndex];
             if (currentRoom.touchesRestartArea(player)) {
                 this.rooms = instantiateRooms(GAME_PROPS, MESSAGE_PROPS);
+                rooms[0].setDoorLocked();
                 currentRoomIndex = 0;
                 this.health = Double.parseDouble(GAME_PROPS.getProperty("initialHealth"));
                 this.coins = Integer.parseInt(GAME_PROPS.getProperty("initialCoins"));
             }
         }
 
-        rooms[currentRoomIndex].displayRoom(health, coins);
+        rooms[currentRoomIndex].displayRoom(health, coins, currentRoomIndex, gameWon);
         Image playerImage = player.getPlayerImage();
         playerImage.draw(player.getPosition().x, player.getPosition().y);
 
@@ -105,14 +96,24 @@ public class ShadowDungeon extends AbstractGame {
             player.setPlayerImage("res/player_left.png");
         }
 
-        // checks if the player collides with unlocked door & both doors are unlocked
+        // checks if the player collides with at least one unlocked door &
+        // all doors are unlocked (i.e. room needs to be changed)
         if (rooms[currentRoomIndex].touchesUnlockedDoor(player)[0]
-                && rooms[currentRoomIndex].touchesUnlockedDoor(player)[1]) {
+                && rooms[currentRoomIndex].touchesUnlockedDoor(player)[1]
+                && currentRoomIndex < NUMBER_ROOMS-1) {
+
+            // move to the next room
             currentRoomIndex++;
-            Room currentRoom = rooms[currentRoomIndex];
-            player.setCoordinates(currentRoom, currentRoom.getDoorCoordinates().x,
-                    currentRoom.getDoorCoordinates().y);
-            roomChange=true;
+
+            // we have reached the last room possible after moving from Battle
+            // room B to the end room (so we won the game)
+            if (currentRoomIndex == NUMBER_ROOMS-1) {
+                this.gameWon=true;
+            }
+
+            // set the player to the correct place in the next room
+            Point doorCoordinates = rooms[currentRoomIndex].getDoorCoordinates();
+            player.setCoordinates(rooms[currentRoomIndex], doorCoordinates.x, doorCoordinates.y);
         }
         // logic to lock door if you move away from unlocked door after room change
         else if (rooms[currentRoomIndex] instanceof BattleRoom
