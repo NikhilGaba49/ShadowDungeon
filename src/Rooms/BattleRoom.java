@@ -97,6 +97,10 @@ public class BattleRoom extends Room {
         return objects; // returning initialised array
     }
 
+    public Point getDoorCoordinates() {
+        return primaryDoor.getPositionCoordinates();
+    }
+
 
     /* We need to check if the player, currently in this battle room, is
      * going to collide with any obstacles in the gameplay, including locked
@@ -114,15 +118,11 @@ public class BattleRoom extends Room {
 
         // arrays for images and central coordinates that'll be needed to
         // determine bounding boxes & whether the player will intersect.
-        Image[] obstacleImages = new Image[walls.length + numberDoorsLocked];
-        Point[] obstacleCoordinates = new Point[walls.length + numberDoorsLocked];
+        Image[] obstacleImages = getImages(walls, walls.length + numberDoorsLocked);
+        Point[] obstacleCoordinates = getObjectsCoordinates(walls, walls.length + numberDoorsLocked);
 
         // obstacle image and obstacle coordinates will correspond by index
-        int i;
-        for (i = 0; i < walls.length; i++) {
-            obstacleImages[i] = walls[i].getImage();
-            obstacleCoordinates[i] = walls[i].getPositionCoordinates();
-        }
+        int i = walls.length;
         // adding the primary & secondary locked doors to obstacle images
         if (!primaryDoor.isDoorUnlocked()) {
             obstacleImages[i] = primaryDoor.getImage();
@@ -164,12 +164,8 @@ public class BattleRoom extends Room {
      */
     public int touchesTreasureBoxes(Player player) {
 
-        Image[] treasureBoxesImages = new Image[treasureBoxes.length];
-        Point[] treasureBoxCoordinates = new Point[treasureBoxes.length];
-        for (int i = 0; i < treasureBoxes.length; i++) {
-            treasureBoxesImages[i] = treasureBoxes[i].getImage();
-            treasureBoxCoordinates[i] = treasureBoxes[i].getPositionCoordinates();
-        }
+        Image[] treasureBoxesImages = getImages(treasureBoxes, treasureBoxes.length);
+        Point[] treasureBoxCoordinates = getObjectsCoordinates(treasureBoxes, treasureBoxes.length);
         int[] touchesResult = player.touchesObstacle(treasureBoxesImages,
                 treasureBoxCoordinates, player.getPosition());
         if (touchesResult[0] == 1) { // the player is colliding with a treasure box
@@ -181,12 +177,8 @@ public class BattleRoom extends Room {
     }
 
     public void touchesEnemy(Player player) {
-        Image[] enemyImages = new Image[enemies.length];
-        Point[] enemyCoordinates = new Point[enemies.length];
-        for (int i = 0; i < enemies.length; i++) {
-            enemyImages[i] = enemies[i].getImage();
-            enemyCoordinates[i] = enemies[i].getPositionCoordinates();
-        }
+        Image[] enemyImages = getImages(enemies, enemies.length);
+        Point[] enemyCoordinates = getObjectsCoordinates(enemies, enemies.length);
         int[] touchesResult = player.touchesObstacle(enemyImages, enemyCoordinates, player.getPosition());
         if (touchesResult[0] == 1){
             enemies = removeIndex(enemies, touchesResult[1]);
@@ -203,6 +195,28 @@ public class BattleRoom extends Room {
         if (objects.length - (indexToRemove + 1) >= 0)
             System.arraycopy(objects, indexToRemove + 1, newObjects, indexToRemove + 1 - 1, objects.length - (indexToRemove + 1));
         return newObjects;
+    }
+
+    public boolean touchesRiver(Player player) {
+        Image[] riverImages = getImages(rivers, rivers.length);
+        Point[] riverCoordinates = getObjectsCoordinates(rivers, rivers.length);
+        return player.touchesObstacle(riverImages, riverCoordinates, player.getPosition())[0] == 1;
+    }
+
+    private Image[] getImages(StationaryObject[] objects, int length) {
+        Image[] objectImage = new Image[length];
+        for (int i=0; i<objects.length; i++) {
+            objectImage[i] = objects[i].getImage();
+        }
+        return objectImage;
+    }
+
+    private Point[] getObjectsCoordinates(StationaryObject[] objects, int length) {
+        Point[] objectCoordinates = new Point[length];
+        for (int i=0; i<objects.length; i++) {
+            objectCoordinates[i] = objects[i].getPositionCoordinates();
+        }
+        return objectCoordinates;
     }
 
     // to set game play for a battle room, these objects must be displayed

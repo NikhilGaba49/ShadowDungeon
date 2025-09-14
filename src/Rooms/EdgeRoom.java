@@ -38,6 +38,11 @@ public class EdgeRoom extends Room {
     }
 
     @Override
+    public Point getDoorCoordinates() {
+        return door.getPositionCoordinates();
+    }
+
+    @Override
     public boolean touchesObstacles(Player player, Point nextMove) {
         if (!door.isDoorUnlocked()) {
             Image[] obstacleImages = {door.getImage()};

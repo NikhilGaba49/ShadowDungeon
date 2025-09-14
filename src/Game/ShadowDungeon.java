@@ -77,6 +77,8 @@ public class ShadowDungeon extends AbstractGame {
                 rooms[currentRoomIndex].setImage("res/restart_area.png", "restartarea.prep");
                 break;
         }
+        rooms[currentRoomIndex].drawStationaryObjects();
+
         rooms[currentRoomIndex].displayText(MESSAGE_PROPS.getProperty("healthDisplay"),
                 Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")),
                 Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[0]),
@@ -94,7 +96,6 @@ public class ShadowDungeon extends AbstractGame {
                 Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[0]),
                 Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[1]),
                 MESSAGE_PROPS.getProperty("coinDisplay"));
-        rooms[currentRoomIndex].drawStationaryObjects();
 
         Image playerImage = player.getPlayerImage();
         playerImage.draw(player.getPosition().x, player.getPosition().y);
@@ -112,7 +113,9 @@ public class ShadowDungeon extends AbstractGame {
         if (rooms[currentRoomIndex].touchesUnlockedDoor(player)[0]
                 && rooms[currentRoomIndex].touchesUnlockedDoor(player)[1]) {
             currentRoomIndex++;
-            player.setCoordinates(rooms[currentRoomIndex], 512, 720);
+            Room currentRoom = rooms[currentRoomIndex];
+            player.setCoordinates(currentRoom, currentRoom.getDoorCoordinates().x,
+                    currentRoom.getDoorCoordinates().y);
             roomChange=true;
         }
         // logic to lock door if you move away from unlocked door after room change
@@ -128,6 +131,11 @@ public class ShadowDungeon extends AbstractGame {
                 coins += currentRoom.touchesTreasureBoxes(player);
             }
             currentRoom.touchesEnemy(player);
+            if (currentRoom.touchesRiver(player)) {
+                health -= HEALTH_DECREASE;
+                // this was inspired from a StackOverflow question
+                health = Math.round((health * 10)) / 10.0;
+            }
         }
 
         // setting door unlocked for the prep room
@@ -155,19 +163,3 @@ public class ShadowDungeon extends AbstractGame {
         game.run();
     }
 }
-
-
-//        int[] touchesResult = player.touchesObstacle(treasureBoxImages, treasureBoxCoords, player.getPosition());
-
-//        if (player.touchesObject(enemyImages, enemyCoords)) {
-//            rooms[currentRoomIndex].setDoorsUnlocked();
-//            ((BattleRoom) rooms[currentRoomIndex]).setEnemies();
-//        } else if (player.touchesObject(riverImages, riverCoords)) {
-//            health -= HEALTH_DECREASE;
-//            // this was inspired from a StackOverflow question
-//            health = Math.round((health * 10)) / 10.0;
-//        } else if (touchesResult[0] == 1) {
-//            BattleRoom battleRoom = (BattleRoom) rooms[currentRoomIndex];
-//            int reward = (battleRoom.removeElement(battleRoom.getTreasureBoxes(), treasureBoxCoords[touchesResult[1]]));
-//            coins += reward;
-//        }
