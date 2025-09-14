@@ -1,5 +1,6 @@
 package Rooms;
 
+import Game.Player;
 import bagel.Image;
 import bagel.util.Point;
 import org.lwjgl.system.linux.Stat;
@@ -7,68 +8,137 @@ import roomComponents.*;
 
 import java.util.Properties;
 
+/* Out of the 4 rooms for this project, the middle two are battle rooms.
+* Battle Room may have objects such as walls, rivers, enemies & treasure boxes.
+* Another key property is having two doors, primary and secondary. */
 public class BattleRoom extends Room {
 
-    Door primaryDoor;
-    Door secondaryDoor;
+    private final Door primaryDoor;
+    private final Door secondaryDoor;
 
-    StationaryObject[] walls;
-    StationaryObject[] rivers;
-    StationaryObject[] enemies;
-    StationaryObject[] treasureBoxes;
-    int[] treasureRewards;
+    // each battle room can have multiple of these stationary objects in them
+    private final StationaryObject[] walls;
+    private final StationaryObject[] rivers;
+    private final StationaryObject[] enemies;
+    private StationaryObject[] treasureBoxes;
 
-    public BattleRoom(Properties GAME_PROPS, Properties MESSAGE_PROPS, String room) {
+    public final int COIN_REWARD_INDEX = 2;
+
+    // instantiate a specific battle room (either A or B) as indicated by room
+    public BattleRoom(Properties GAME_PROPS, Properties MESSAGE_PROPS,
+                        String room) {
+
+        // initiate common functionality in Room
         super(GAME_PROPS, MESSAGE_PROPS);
 
-        String primaryDoorStem = "primarydoor.";
-        String secondaryDoorStem = "secondarydoor.";
-        primaryDoor = new Door(getCoordinates(primaryDoorStem.concat(room), GAME_PROPS)[0]);
-        secondaryDoor = new Door(getCoordinates(secondaryDoorStem.concat(room), GAME_PROPS)[0]);
+        // a structured way to extract the coordinates for the primary door and
+        // the secondary door from GAME_PROPS regardless of room A or room B
+        primaryDoor = new Door(getCoordinates("primarydoor.".concat(room),
+                                    GAME_PROPS)[0]);
+        secondaryDoor = new Door(getCoordinates("secondarydoor.".concat(room),
+                                    GAME_PROPS)[0]);
 
-        walls = new Wall[getCoordinates("wall.".concat(room), GAME_PROPS).length];
-        for (int i=0; i<walls.length; i++) {
-            walls[i] = new Wall(getCoordinates("wall.".concat(room), GAME_PROPS)[i]);
-        }
+        // initiate stationary objects for the battle room
+        walls = initiateArrays(GAME_PROPS, "wall.", room);
+        rivers = initiateArrays(GAME_PROPS, "river.", room);
+        enemies = initiateArrays(GAME_PROPS, "keyBulletKin.", room);
 
-        rivers = new River[getCoordinates("river.".concat(room), GAME_PROPS).length];
-        for (int i=0; i<rivers.length; i++) {
-            rivers[i] = new River(getCoordinates("river.".concat(room), GAME_PROPS)[i]);
-        }
+        // initialise treasure boxes array separately accounting for coin reward
+        treasureBoxes = new TreasureBox[
+                getCoordinates("treasurebox.".concat(room), GAME_PROPS).length];
 
-        enemies = new Enemy[getCoordinates("keyBulletKin.".concat(room), GAME_PROPS).length];
-        for (int i=0; i<enemies.length; i++) {
-            enemies[i] = new Enemy(getCoordinates("keyBulletKin.".concat(room), GAME_PROPS)[i]);
-        }
+        // read rewards from GAME_PROPS
+        String[] rewards = GAME_PROPS.getProperty(
+                "treasurebox.".concat(room)).split(";");
 
-        treasureBoxes = new TreasureBox[getCoordinates("treasurebox.".concat(room), GAME_PROPS).length];
+        // assign a new treasure box object to each element in array
         for (int i=0; i<treasureBoxes.length; i++) {
-            treasureBoxes[i] = new TreasureBox(getCoordinates("treasurebox.".concat(room), GAME_PROPS)[i]);
+            treasureBoxes[i] = new TreasureBox(
+                getCoordinates("treasurebox.".concat(room), GAME_PROPS)[i],
+                Integer.parseInt(rewards[i].split(",")[COIN_REWARD_INDEX]));
         }
-        treasureRewards = new int[treasureBoxes.length];
-        String[] rewards = GAME_PROPS.getProperty("treasurebox.".concat(room)).split(";");
-        for (int i=0; i< rewards.length; i++) {
-            treasureRewards[i] = Integer.parseInt(rewards[i].split(",")[2]);
+    }
+
+    /* A method that initiates the StationaryObject array depending on type
+    of object, as specified by object, a string.
+     */
+    public static StationaryObject[] initiateArrays(Properties GAME_PROPS,
+                                            String object, String room) {
+
+        StationaryObject[] objects;
+        Point[] coordinates = getCoordinates(object.concat(room), GAME_PROPS);
+
+        // a switch statement to determine which type of objects to initialise
+        switch (object) {
+            case ("wall."):
+                objects = new Wall[coordinates.length];
+                for (int i=0; i<objects.length; i++) {
+                    objects[i] = new Wall(coordinates[i]);
+                }
+                break;
+            case("river."):
+                objects = new River[coordinates.length];
+                for (int i=0; i<objects.length; i++) {
+                    objects[i] = new River(coordinates[i]);
+                }
+                break;
+            case("keyBulletKin."):
+                objects = new Enemy[coordinates.length];
+                for (int i=0; i<objects.length; i++) {
+                    objects[i] = new Enemy(coordinates[i]);
+                }
+                break;
+
+            // if called by mistake, we manage by returning null
+            default:
+                return null;
         }
+        return objects; // returning initialised array
+    }
+
+    /* We need to check if the player, currently in this battle room, is
+    * going to collide with any obstacles in the gameplay, including locked
+    * doors and walls. Returns a boolean truth value. */
+    public boolean touchesObstacles(Player player, Point nextMove) {
+
+        int numberDoorsLocked = 0;
+
+        if (!primaryDoor.isDoorUnlocked()) {
+            numberDoorsLocked++;
+        }
+        if (!secondaryDoor.isDoorUnlocked()) {
+            numberDoorsLocked++;
+        }
+
+        // arrays for images and central coordinates that'll be needed to
+        // determine bounding boxes & whether the player will intersect.
+        Image[] obstacleImages = new Image[walls.length + numberDoorsLocked];
+        Point[] obstacleCoordinates = new Point[walls.length + numberDoorsLocked];
+
+        // obstacle image and obstacle coordinates will correspond by index
+        int i;
+        for (i=0; i<walls.length; i++) {
+            obstacleImages[i] = walls[i].getImage();
+            obstacleCoordinates[i] = walls[i].getPositionCoordinates();
+        }
+        if (!primaryDoor.isDoorUnlocked()) {
+            obstacleImages[i] = primaryDoor.getImage();
+            obstacleCoordinates[i] = primaryDoor.getPositionCoordinates();
+        }
+        if (!secondaryDoor.isDoorUnlocked()) {
+            obstacleImages[i] = secondaryDoor.getImage();
+            obstacleCoordinates[i] = secondaryDoor.getPositionCoordinates();
+        }
+        return player.touchesObstacle(obstacleImages, obstacleCoordinates, nextMove)[0] == 1;
     }
 
     @Override
     public void drawDoors() {
-        primaryDoor.drawDoor();
-        secondaryDoor.drawDoor();
+        primaryDoor.drawObject();
+        secondaryDoor.drawObject();
     }
 
-    @Override
-    public Door[] getDoors() {
-        return new Door[]{secondaryDoor, primaryDoor};
-    }
-
-    public void setTreasureBoxes() {
-        StationaryObject[] newTreasureBoxes = new TreasureBox[treasureBoxes.length-1];
-        System.arraycopy(treasureBoxes, 1, newTreasureBoxes, 0, newTreasureBoxes.length);
-        treasureBoxes = newTreasureBoxes;
-    }
-
+    // to set game play for a battle room, these objects must be displayed
     @Override
     public void drawStationaryObjects() {
         for (StationaryObject wall: walls) {
@@ -85,124 +155,51 @@ public class BattleRoom extends Room {
         }
     }
 
+    public void setTreasureBoxes() {
+        StationaryObject[] newTreasureBoxes = new TreasureBox[treasureBoxes.length-1];
+        System.arraycopy(treasureBoxes, 1, newTreasureBoxes, 0, newTreasureBoxes.length);
+        treasureBoxes = newTreasureBoxes;
+    }
+
+
     public void setDoorsUnlocked() {
         primaryDoor.setDoorUnlocked();
         secondaryDoor.setDoorUnlocked();
     }
 
-    @Override
-    public Image[] getUnlockedImages() {
-        if (primaryDoor.isDoorUnlocked()) {
-            return new Image[]{primaryDoor.getUnlockedDoorImages(), secondaryDoor.getUnlockedDoorImages()};
-        }
-        return null;
-    }
-
-    @Override
-    public Point[] getDoorCoords() {
-        return new Point[]{primaryDoor.getDoorCoordinates(), secondaryDoor.getDoorCoordinates()};
-    }
-
-    public Image[] getEnemyImages() {
-        Image[] enemyImages = new Image[enemies.length];
-        for (int i=0; i<enemies.length; i++) {
-            enemyImages[i] = enemies[i].getImage();
-        }
-        return enemyImages;
-    }
-    public Image[] getTreasureBoxImages() {
-        Image[] treasureBoxImages = new Image[treasureBoxes.length];
-        for (int i=0; i<treasureBoxes.length; i++) {
-            treasureBoxImages[i] = treasureBoxes[i].getImage();
-        }
-        return treasureBoxImages;
-    }
-
-    public Point[] getRiverCoords() {
-        Point[] riverCoordinates = new Point[rivers.length];
-        for (int i=0; i<rivers.length; i++) {
-            riverCoordinates[i] = rivers[i].getPositionCoordinates();
-        }
-        return riverCoordinates;
-    }
-
-    public Point[] getTreasureBoxCoords() {
-        Point[] treasureBoxCoords = new Point[treasureBoxes.length];
-        for (int i=0; i<treasureBoxes.length; i++) {
-            treasureBoxCoords[i] = treasureBoxes[i].getPositionCoordinates();
-        }
-        return treasureBoxCoords;
-    }
 
     public StationaryObject[] getTreasureBoxes() {
         return treasureBoxes;
     }
 
-    public double getTreasureRewards(int rewardIndex) {
-        return treasureRewards[rewardIndex];
+
+//    public int removeElement(StationaryObject[] objects, Point toRemove) {
+//        int indexRemove= objects.length;
+//        for (int i=0; i<objects.length; i++) {
+//            if (objects[i].getPositionCoordinates().equals(toRemove)) {
+//                indexRemove = i;
+//            }
+//        }
+//        int treasureRewardCoins = treasureRewards[indexRemove];
+//        StationaryObject[] newTreasureBoxes = new TreasureBox[objects.length-1];
+//        int[] newTreasureRewards = new int[objects.length-1];
+//        for (int i=0; i<indexRemove; i++) {
+//            newTreasureBoxes[i] = objects[i];
+//            newTreasureRewards[i] = treasureRewards[i];
+//        }
+//        for (int i=indexRemove+1; i<objects.length; i++) {
+//            newTreasureBoxes[i-1] = objects[i];
+//            newTreasureRewards[i-1] = treasureRewards[i];
+//        }
+//        treasureBoxes = newTreasureBoxes;
+//        treasureRewards = newTreasureRewards;
+//        return treasureRewardCoins;
     }
 
-
-    public int removeElement(StationaryObject[] objects, Point toRemove) {
-        int indexRemove= objects.length;
-        for (int i=0; i<objects.length; i++) {
-            if (objects[i].getPositionCoordinates().equals(toRemove)) {
-                indexRemove = i;
-            }
-        }
-        int treasureRewardCoins = treasureRewards[indexRemove];
-        StationaryObject[] newTreasureBoxes = new TreasureBox[objects.length-1];
-        int[] newTreasureRewards = new int[objects.length-1];
-        for (int i=0; i<indexRemove; i++) {
-            newTreasureBoxes[i] = objects[i];
-            newTreasureRewards[i] = treasureRewards[i];
-        }
-        for (int i=indexRemove+1; i<objects.length; i++) {
-            newTreasureBoxes[i-1] = objects[i];
-            newTreasureRewards[i-1] = treasureRewards[i];
-        }
-        treasureBoxes = newTreasureBoxes;
-        treasureRewards = newTreasureRewards;
-        return treasureRewardCoins;
-    }
-
-    public Image[] getRiverImages() {
-        Image[] riverImages = new Image[rivers.length];
-        for (int i=0; i<rivers.length; i++) {
-            riverImages[i] = rivers[i].getImage();
-        }
-        return riverImages;
-    }
-
-    public Point[] getWallCoords() {
-        Point[] wallCoordinates = new Point[walls.length];
-        for (int i=0; i<walls.length; i++) {
-            wallCoordinates[i] = walls[i].getPositionCoordinates();
-        }
-        return wallCoordinates;
-    }
-
-    public Image[] getWallImages() {
-        Image[] wallImages = new Image[walls.length];
-        for (int i=0; i<walls.length; i++) {
-            wallImages[i] = walls[i].getImage();
-        }
-        return wallImages;
-    }
-
-    public Point[] getEnemyCoords() {
-        Point[] enemyCoordinates = new Point[enemies.length];
-        for (int i=0; i<enemies.length; i++) {
-            enemyCoordinates[i] = enemies[i].getPositionCoordinates();
-        }
-        return enemyCoordinates;
-    }
-
-    public void setEnemies() {
-        StationaryObject[] newEnemies = new StationaryObject[enemies.length-1];
-        for (int i=0; i< newEnemies.length; i++) {
-            newEnemies[i] = enemies[i+1];
-        }
-        enemies = newEnemies;
-    }
-}
+//    public void setEnemies() {
+//        StationaryObject[] newEnemies = new StationaryObject[enemies.length-1];
+//        for (int i=0; i< newEnemies.length; i++) {
+//            newEnemies[i] = enemies[i+1];
+//        }
+//        enemies = newEnemies;
+//    }

@@ -107,9 +107,7 @@ public abstract class Room {
     }
 
     public abstract void drawDoors();
-    public abstract Door[] getDoors();
     public abstract void drawStationaryObjects();
-    public abstract Point[] getDoorCoords();
     public abstract void setDoorsUnlocked();
-    public abstract Image[] getUnlockedImages();
+    public abstract boolean touchesObstacles(Player player, Point nextMove);
 }

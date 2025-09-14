@@ -5,6 +5,7 @@ import bagel.Image;
 import bagel.util.Point;
 import roomComponents.Door;
 
+import java.util.Arrays;
 import java.util.Properties;
 
 public class EdgeRoom extends Room {
@@ -20,15 +21,7 @@ public class EdgeRoom extends Room {
 
     @Override
     public void drawDoors() {
-        door.drawDoor();
-    }
-
-    public Door[] getDoors() {
-        return new Door[]{door};
-    }
-
-    public Point[] getDoorCoords() {
-        return new Point[]{door.getDoorCoordinates()};
+        door.drawObject();
     }
 
     @Override
@@ -36,15 +29,14 @@ public class EdgeRoom extends Room {
         door.setDoorUnlocked();
     }
 
-    public Image[] getUnlockedImages(){
-        if (door.isDoorUnlocked()) {
-            return new Image[]{door.getUnlockedDoorImages()};
+    @Override
+    public boolean touchesObstacles(Player player, Point nextMove) {
+        if (!door.isDoorUnlocked()) {
+            Image[] obstacleImages = {door.getImage()};
+            Point[] obstacleCoordinates = {door.getPositionCoordinates()};
+            return player.touchesObstacle(obstacleImages, obstacleCoordinates, nextMove)[0] == 1;
         }
-        return null;
-    }
-
-    public Image[] getLockedDoorImages(){
-        return door.getLockedDoorImages();
+        return false;
     }
 
     @Override

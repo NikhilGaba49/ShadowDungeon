@@ -15,7 +15,7 @@ public class Player {
     private final Properties MESSAGE_PROPS;
 
     private Point coordinates;
-    private Image playerImage = new Image("res/player_left.png");
+    private Image playerImage = new Image("res/player_right.png");
 
     public Player(Properties GAME_PROPS, Properties MESSAGE_PROPS){
         this.GAME_PROPS = GAME_PROPS;
@@ -26,6 +26,10 @@ public class Player {
 
     public Image getPlayerImage() {
         return playerImage;
+    }
+
+    public void setPlayerImage(String playerImage) {
+        this.playerImage = new Image(playerImage);
     }
 
     public Point getPosition() {
@@ -41,11 +45,8 @@ public class Player {
         }
     }
 
-    public void setPlayerImage(Image playerImage) {
-        this.playerImage = playerImage;
-    }
-
-    public void movePlayer(Input input, Room room, int SPEED, Image[] obstacleImages, Point[] obstacleCoordinates) {
+    public void movePlayer(Input input, Room room, Player player,
+                                int SPEED) {
 
         Point nextMove = null;
         if (input.isDown(Keys.W)) {
@@ -58,17 +59,10 @@ public class Player {
             nextMove = new Point(getPosition().x + SPEED, getPosition().y);
         }
         if (nextMove != null) {
-            if (allowMovement(obstacleImages, obstacleCoordinates, nextMove)) {
+            if (!room.touchesObstacles(player, nextMove)) {
                 setCoordinates(room, nextMove.x, nextMove.y);
             }
         }
-    }
-
-    private boolean allowMovement(Image[] obstacleImages, Point[] obstacleCoordinates, Point nextMove) {
-        if (obstacleImages == null) {
-            return true;
-        }
-        return touchesObstacle(obstacleImages, obstacleCoordinates, nextMove)[0] == 0;
     }
 
     /* Returns an integer array, containing information about whether the player touched an object (1) or not (0)

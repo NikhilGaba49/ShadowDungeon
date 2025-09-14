@@ -9,8 +9,8 @@ public abstract class StationaryObject {
 
     // A stationary point is identified by it's coordinates and image drawn
     private final Point coordinates;
-    private final String filename;
-    private final Image object;
+    private String filename;
+    private Image object;
 
     // constructor to declare instance variables regardless of type of
     // stationary object. Note that this will never be called.
@@ -28,6 +28,12 @@ public abstract class StationaryObject {
     // getter returning the image formed for a given stationary object
     public Image getImage() {
         return object;
+    }
+
+    // setter to change the filename, and thus the image drawn
+    public void setImageFilename(String filename) {
+        this.filename = filename;
+        this.object = new Image(filename);
     }
 
     // draw the object at specified coordinates

@@ -3,48 +3,33 @@ package roomComponents;
 import bagel.*;
 import bagel.util.Point;
 
-public class Door {
+/* Doors are stationary objects. Functionality extended by below attributes
+ and methods. */
+public class Door extends StationaryObject {
 
-    // instance variables describing the state of the door
     private boolean doorUnlocked;
-    private Image doorImage;
-    private final Point doorCoordinates;
+    private final static String lockedDoorFile = "res/locked_door.png";
+    private final static String unlockedDoorFile = "res/unlocked_door.png";
 
-    // constructor
+    // setting the door at the correct coordinates with the right filename
     public Door(Point doorCoordinates) {
-        this.doorCoordinates = doorCoordinates;
-        this.doorImage = new Image("res/locked_door.png");
+        super(doorCoordinates, lockedDoorFile);
         this.doorUnlocked = false;
     }
 
-    public void setDoorUnlocked() {
-        doorUnlocked = true;
-        doorImage = new Image("res/unlocked_door.png");
-    }
-
+    // getter function to check whether a door is unlocked or not
     public boolean isDoorUnlocked() {
         return doorUnlocked;
     }
 
-    public Image getUnlockedDoorImages() {
-        if (doorUnlocked) {
-            return doorImage;
-        }
-        return null;
+    // updating the doorUnlocked boolean and the corresponding images
+    public void setDoorUnlocked() {
+        doorUnlocked = true;
+        setImageFilename(unlockedDoorFile);
     }
-
-    public Image[] getLockedDoorImages() {
-        if (!doorUnlocked) {
-            return new Image[]{doorImage};
-        }
-        return null;
-    }
-
-    public Point getDoorCoordinates() {
-        return doorCoordinates;
-    }
-
-    public void drawDoor(){
-        doorImage.draw(doorCoordinates.x, doorCoordinates.y);
+    // similar, but complementing it to set door locked, rather than unlocked
+    public void setDoorLocked() {
+        doorUnlocked = false;
+        setImageFilename(lockedDoorFile);
     }
 }
