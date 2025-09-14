@@ -6,6 +6,7 @@ import Rooms.Room;
 
 import bagel.*;
 import bagel.util.Point;
+import roomComponents.StationaryObject;
 
 import java.util.Properties;
 
@@ -71,9 +72,15 @@ public class ShadowDungeon extends AbstractGame {
 
         rooms[currentRoomIndex].setBackground();
 
-        if (health < 0) {
+        // game has been lost
+        if (health < 0 && currentRoomIndex != NUMBER_ROOMS-1) {
             currentRoomIndex = NUMBER_ROOMS - 1;
+
+            Point startingCoordinates = Room.getCoordinates("player.start", GAME_PROPS)[0];
+            player.setCoordinates(rooms[currentRoomIndex], startingCoordinates.x, startingCoordinates.y);
+
             rooms[currentRoomIndex].setDoorLocked();
+            gameWon = false;
         }
 
         if (rooms[currentRoomIndex] instanceof EdgeRoom && input.wasPressed(Keys.ENTER)) {
@@ -88,8 +95,7 @@ public class ShadowDungeon extends AbstractGame {
         }
 
         rooms[currentRoomIndex].displayRoom(health, coins, currentRoomIndex, gameWon);
-        Image playerImage = player.getPlayerImage();
-        playerImage.draw(player.getPosition().x, player.getPosition().y);
+        player.drawPlayer();
 
         // add functionality for player to face the mouse position
         player.movePlayer(input, rooms[currentRoomIndex], player, SPEED);
@@ -135,6 +141,9 @@ public class ShadowDungeon extends AbstractGame {
         else if (rooms[currentRoomIndex] instanceof BattleRoom && !touchesResult[0] && !touchesResult[1]) {
             rooms[currentRoomIndex].setDoorLocked();
             roomChange = false;
+            for (StationaryObject enemy : ((BattleRoom) rooms[currentRoomIndex]).getEnemies()) {
+                enemy.drawObject();
+            }
         }
 
         // just been a room change & we have moved away from the unlocked door (README FILE PLS)
@@ -144,7 +153,7 @@ public class ShadowDungeon extends AbstractGame {
 
         if (rooms[currentRoomIndex] instanceof BattleRoom) {
             BattleRoom currentRoom = (BattleRoom) rooms[currentRoomIndex];
-            if (input.wasPressed(Keys.ENTER)) {
+            if (input.wasPressed(Keys.K)) {
                 coins += currentRoom.touchesTreasureBoxes(player);
             }
             currentRoom.touchesEnemy(player);
@@ -153,6 +162,11 @@ public class ShadowDungeon extends AbstractGame {
                 // this was inspired from a StackOverflow question
                 health = Math.round((health * 10)) / 10.0;
             }
+        }
+
+        if (gameWon && rooms[currentRoomIndex] instanceof BattleRoom) {
+            ((BattleRoom) rooms[currentRoomIndex]).drawTreasureBoxes();
+            player.drawPlayer();
         }
 
         // setting door unlocked for the prep room

@@ -20,8 +20,13 @@ public class Player {
     public Player(Properties GAME_PROPS, Properties MESSAGE_PROPS){
         this.GAME_PROPS = GAME_PROPS;
         this.MESSAGE_PROPS = MESSAGE_PROPS;
-        String[] coordinates = GAME_PROPS.getProperty("player.start").split(",");
-        this.coordinates = new Point(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1]));
+        Point coordinates = Room.getCoordinates("player.start", GAME_PROPS)[0];
+        this.coordinates = new Point(coordinates.x, coordinates.y);
+    }
+
+    public void drawPlayer() {
+        Image playerImage = getPlayerImage();
+        playerImage.draw(getPosition().x, getPosition().y);
     }
 
     public Image getPlayerImage() {

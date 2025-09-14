@@ -101,6 +101,10 @@ public class BattleRoom extends Room {
         return primaryDoor.getPositionCoordinates();
     }
 
+    public StationaryObject[] getEnemies() {
+        return enemies;
+    }
+
 
     /* We need to check if the player, currently in this battle room, is
      * going to collide with any obstacles in the gameplay, including locked
@@ -237,12 +241,12 @@ public class BattleRoom extends Room {
         for (StationaryObject wall : walls) {
             wall.drawObject();
         }
-        for (StationaryObject enemy : enemies) {
-            enemy.drawObject();
-        }
         for (StationaryObject river : rivers) {
             river.drawObject();
         }
+    }
+
+    public void drawTreasureBoxes() {
         for (StationaryObject treasureBox : treasureBoxes) {
             treasureBox.drawObject();
         }
