@@ -138,24 +138,32 @@ public class BattleRoom extends Room {
                 nextMove)[0] == 1;
     }
 
-    /* checks whether the player is colliding with any unlocked door. If only
-     * one door is unlocked, this means that room has just been changed, so we
-     * should not change room instead. Returns a boolean array, with first index
-     * being if the player intersects with any of the unlocked doors and the
-     * second index is if both doors are unlocked in the room. */
+    /* checks whether player is colliding with any unlocked door. If only one
+     * door is unlocked, room has just been changed, so we should not change
+     * room. Returns a boolean array, with first index being if the player
+     *  intersects with any of the unlocked doors and second index is if both
+     *  doors are unlocked in the room. Third index returns whether player
+     *  touches secondary door and needs to go to next room) */
     @Override
-    public boolean[] touchesUnlockedDoor(Player player) {
+    public boolean[] touchesUnlockedDoor(Player player, int currentRoomIndex) {
 
         if (primaryDoor.isDoorUnlocked() && secondaryDoor.isDoorUnlocked()) {
             Image[] unlockedDoorImages = {primaryDoor.getImage(), secondaryDoor.getImage()};
-            Point[] unlockedDoorCoordinates = {primaryDoor.getPositionCoordinates(), secondaryDoor.getPositionCoordinates()};
-            return new boolean[]{player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition())[0] == 1, true};
+            Point[] unlockedDoorCoordinates = {primaryDoor.getPositionCoordinates(),
+                    secondaryDoor.getPositionCoordinates()};
+
+            int[] touchResult = player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition());
+
+            return new boolean[]{touchResult[0] == 1, true, touchResult[1] == 1};
+
         } else if (primaryDoor.isDoorUnlocked()) {
             Image[] unlockedDoorImages = {primaryDoor.getImage()};
             Point[] unlockedDoorCoordinates = {primaryDoor.getPositionCoordinates()};
-            return new boolean[]{player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition())[0] == 1, false};
+
+            int[] touchResult = player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition());
+            return new boolean[]{touchResult[0] == 1, false, false};
         }
-        return new boolean[]{false, primaryDoor.isDoorUnlocked() && secondaryDoor.isDoorUnlocked()};
+        return new boolean[]{false, primaryDoor.isDoorUnlocked() && secondaryDoor.isDoorUnlocked(), false};
     }
 
     /* Checks whether the player touches a specific treasure box. Appropriate

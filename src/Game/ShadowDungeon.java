@@ -9,6 +9,8 @@ import bagel.util.Point;
 
 import java.util.Properties;
 
+import static java.lang.System.exit;
+
 public class ShadowDungeon extends AbstractGame {
 
     private final Properties GAME_PROPS;
@@ -27,6 +29,8 @@ public class ShadowDungeon extends AbstractGame {
 
     private double health;
     private double coins;
+
+    private boolean roomChange = false;
 
     public ShadowDungeon(Properties gameProps, Properties messageProps) {
         super(Integer.parseInt(gameProps.getProperty("window.width")),
@@ -96,30 +100,46 @@ public class ShadowDungeon extends AbstractGame {
             player.setPlayerImage("res/player_left.png");
         }
 
+        boolean[] touchesResult = rooms[currentRoomIndex].touchesUnlockedDoor(player, currentRoomIndex);
+
         // checks if the player collides with at least one unlocked door &
         // all doors are unlocked (i.e. room needs to be changed)
-        if (rooms[currentRoomIndex].touchesUnlockedDoor(player)[0]
-                && rooms[currentRoomIndex].touchesUnlockedDoor(player)[1]
-                && currentRoomIndex < NUMBER_ROOMS-1) {
+        if (touchesResult[0] && touchesResult[1] && !roomChange) {
 
-            // move to the next room
-            currentRoomIndex++;
+            if (touchesResult[2]) {
 
-            // we have reached the last room possible after moving from Battle
-            // room B to the end room (so we won the game)
-            if (currentRoomIndex == NUMBER_ROOMS-1) {
-                this.gameWon=true;
+                // move to the next room
+                currentRoomIndex++;
+                // we have reached the last room possible after moving from Battle
+                // room B to the end room (so we won the game)
+                if (currentRoomIndex == NUMBER_ROOMS-1) {
+                    this.gameWon=true;
+                }
+            }
+
+            else {
+                currentRoomIndex--;
+                // set the player to the correct place in the next room
+                Point doorCoordinates = rooms[currentRoomIndex].getDoorCoordinates();
+                player.setCoordinates(rooms[currentRoomIndex], doorCoordinates.x, doorCoordinates.y);
             }
 
             // set the player to the correct place in the next room
             Point doorCoordinates = rooms[currentRoomIndex].getDoorCoordinates();
             player.setCoordinates(rooms[currentRoomIndex], doorCoordinates.x, doorCoordinates.y);
+
+            roomChange = true;
         }
+
         // logic to lock door if you move away from unlocked door after room change
-        else if (rooms[currentRoomIndex] instanceof BattleRoom
-                && !(rooms[currentRoomIndex].touchesUnlockedDoor(player)[0])
-                && !(rooms[currentRoomIndex].touchesUnlockedDoor(player)[1])) {
+        else if (rooms[currentRoomIndex] instanceof BattleRoom && !touchesResult[0] && !touchesResult[1]) {
             rooms[currentRoomIndex].setDoorLocked();
+            roomChange = false;
+        }
+
+        // just been a room change & we have moved away from the unlocked door (README FILE PLS)
+        else if (roomChange && !touchesResult[0]) {
+            roomChange = false;
         }
 
         if (rooms[currentRoomIndex] instanceof BattleRoom) {

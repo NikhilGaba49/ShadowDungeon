@@ -46,14 +46,28 @@ public class EdgeRoom extends Room {
         }
     }
 
+    /* Returns an array of booleans with key properties.
+    *       - Index 0: Player touches at least one unlocked door
+    *       - Index 1: All doors within room are unlocked
+    *       - Index 2: Player needs to go to the next room
+    * */
+    @Override
+    public boolean[] touchesUnlockedDoor(Player player, int currentRoomIndex) {
 
-    public boolean[] touchesUnlockedDoor(Player player) {
         if (door.isDoorUnlocked()) {
             Image[] unlockedDoorImages = {door.getImage()};
             Point[] unlockedDoorCoordinates = {door.getPositionCoordinates()};
-            return new boolean[] {player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition())[0] == 1, true};
+
+            int[] touchesResult = player.touchesObstacle(unlockedDoorImages, unlockedDoorCoordinates, player.getPosition());
+
+            if (currentRoomIndex == NUMBER_ROOMS-1) {
+                return new boolean[]{touchesResult[0] == 1, true, false};
+            }
+            else {
+                return new boolean[]{touchesResult[0] == 1, true, true};
+            }
         }
-        return new boolean[] {false};
+        return new boolean[] {false, false, false};
     }
 
     @Override
