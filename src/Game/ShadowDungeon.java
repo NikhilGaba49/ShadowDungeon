@@ -22,7 +22,7 @@ public class ShadowDungeon extends AbstractGame {
 
     private final boolean gameWon;
 
-    private final Room[] rooms = new Room[NUMBER_ROOMS];
+    private Room[] rooms;
     private int currentRoomIndex;
 
     private double health;
@@ -38,18 +38,25 @@ public class ShadowDungeon extends AbstractGame {
         this.GAME_PROPS = gameProps;
         this.MESSAGE_PROPS = messageProps;
 
+        this.rooms = instantiateRooms(GAME_PROPS, MESSAGE_PROPS);
+
+        this.health = Double.parseDouble(GAME_PROPS.getProperty("initialHealth"));
+        this.coins = Integer.parseInt(GAME_PROPS.getProperty("initialCoins"));
+
         this.player = new Player(gameProps, messageProps);
         this.SPEED = Integer.parseInt(gameProps.getProperty("movingSpeed"));
 
+        this.HEALTH_DECREASE = Double.parseDouble(GAME_PROPS.getProperty("riverDamagePerFrame"));
+        this.gameWon = false;
+    }
+
+    public Room[] instantiateRooms(Properties GAME_PROPS, Properties MESSAGE_PROPS) {
+        Room[] rooms = new Room[NUMBER_ROOMS];
         rooms[0] = new EdgeRoom(GAME_PROPS, MESSAGE_PROPS, "prep");
         rooms[1] = new BattleRoom(GAME_PROPS, MESSAGE_PROPS, "A");
         rooms[2] = new BattleRoom(GAME_PROPS, MESSAGE_PROPS, "B");
         rooms[3] = new EdgeRoom(GAME_PROPS, MESSAGE_PROPS, "end");
-
-        this.health = Double.parseDouble(GAME_PROPS.getProperty("initialHealth"));
-        this.coins = Integer.parseInt(GAME_PROPS.getProperty("initialCoins"));
-        this.HEALTH_DECREASE = Double.parseDouble(GAME_PROPS.getProperty("riverDamagePerFrame"));
-        this.gameWon = false;
+        return rooms;
     }
 
     /**
@@ -69,34 +76,23 @@ public class ShadowDungeon extends AbstractGame {
             case 0:
                 rooms[currentRoomIndex].displayTextProperty("title", "title.fontSize", "", "title.y");
                 rooms[currentRoomIndex].displayTextProperty("moveMessage", "prompt.fontSize", "", "moveMessage.y");
-                rooms[currentRoomIndex].setImage("res/restart_area.png", "restartarea.prep");
                 break;
 
             case (3):
                 rooms[currentRoomIndex].displayTextProperty("gameEnd.lost", "title.fontSize", "", "title.y");
-                rooms[currentRoomIndex].setImage("res/restart_area.png", "restartarea.prep");
                 break;
         }
-        rooms[currentRoomIndex].drawStationaryObjects();
+        if (rooms[currentRoomIndex] instanceof EdgeRoom && input.wasPressed(Keys.ENTER)) {
+            EdgeRoom currentRoom = (EdgeRoom) rooms[currentRoomIndex];
+            if (currentRoom.touchesRestartArea(player)) {
+                this.rooms = instantiateRooms(GAME_PROPS, MESSAGE_PROPS);
+                currentRoomIndex = 0;
+                this.health = Double.parseDouble(GAME_PROPS.getProperty("initialHealth"));
+                this.coins = Integer.parseInt(GAME_PROPS.getProperty("initialCoins"));
+            }
+        }
 
-        rooms[currentRoomIndex].displayText(MESSAGE_PROPS.getProperty("healthDisplay"),
-                Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")),
-                Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[0]),
-                Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[1]));
-        rooms[currentRoomIndex].displayText(MESSAGE_PROPS.getProperty("coinDisplay"),
-                Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")),
-                Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[0]),
-                Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[1]));
-        rooms[currentRoomIndex].displayText(Double.toString(health),
-                Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")), Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[0]),
-                Integer.parseInt(GAME_PROPS.getProperty("healthStat").split(",")[1]),
-                MESSAGE_PROPS.getProperty("healthDisplay"));
-        rooms[currentRoomIndex].displayText(Double.toString(coins),
-                Integer.parseInt(GAME_PROPS.getProperty("playerStats.fontSize")),
-                Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[0]),
-                Integer.parseInt(GAME_PROPS.getProperty("coinStat").split(",")[1]),
-                MESSAGE_PROPS.getProperty("coinDisplay"));
-
+        rooms[currentRoomIndex].displayRoom(health, coins);
         Image playerImage = player.getPlayerImage();
         playerImage.draw(player.getPosition().x, player.getPosition().y);
 

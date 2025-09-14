@@ -240,12 +240,6 @@ public class BattleRoom extends Room {
         }
     }
 
-    public void setTreasureBoxes() {
-        StationaryObject[] newTreasureBoxes = new TreasureBox[treasureBoxes.length - 1];
-        System.arraycopy(treasureBoxes, 1, newTreasureBoxes, 0, newTreasureBoxes.length);
-        treasureBoxes = newTreasureBoxes;
-    }
-
     public void setDoorsUnlocked() {
         primaryDoor.setDoorUnlocked();
         secondaryDoor.setDoorUnlocked();
@@ -253,9 +247,5 @@ public class BattleRoom extends Room {
 
     public void setDoorLocked() {
         primaryDoor.setDoorLocked();
-    }
-
-    public StationaryObject[] getTreasureBoxes() {
-        return treasureBoxes;
     }
 }

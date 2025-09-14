@@ -4,6 +4,7 @@ import Game.Player;
 import bagel.Image;
 import bagel.util.Point;
 import roomComponents.Door;
+import roomComponents.RestartArea;
 
 import java.util.Arrays;
 import java.util.Properties;
@@ -11,12 +12,14 @@ import java.util.Properties;
 public class EdgeRoom extends Room {
 
     private final Door door;
+    private final RestartArea restartArea;
 
     public EdgeRoom(Properties GAME_PROPS, Properties MESSAGE_PROPS, String room) {
         super(GAME_PROPS, MESSAGE_PROPS);
 
         String roomPropertyStem = "door.";
         door = new Door(getCoordinates(roomPropertyStem.concat(room), GAME_PROPS)[0]);
+        restartArea = new RestartArea(getCoordinates("restartarea.".concat(room), GAME_PROPS)[0]);
     }
 
     public boolean[] touchesUnlockedDoor(Player player) {
@@ -52,8 +55,15 @@ public class EdgeRoom extends Room {
         return false;
     }
 
+    public boolean touchesRestartArea(Player player) {
+        Image[] restartAreaImages = new Image[] {restartArea.getImage()};
+        Point[] restartAreaCoordinates = new Point[] {restartArea.getPositionCoordinates()};
+        return player.touchesObstacle(restartAreaImages, restartAreaCoordinates, player.getPosition())[0] == 1;
+    }
+
     @Override
     public void drawStationaryObjects() {
         door.drawObject();
+        restartArea.drawObject();
     }
 }
